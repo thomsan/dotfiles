@@ -232,3 +232,65 @@ function transfer() {
 win2unix () {
   echo "/$1" | sed 's/\\/\//g' | sed 's/://' | sed 's/ /\\ /'
 }
+
+unix2win () {
+  echo "$1" | sed 's/\///' | sed 's/\//:\//' | sed 's/\\ / /' | sed 's/\//\\/g'
+}
+
+# generate absolute path from relative path
+# $1     : relative filename
+# return : absolute path
+function abspath() {
+    
+    if [ -d "$1" ]; then
+        # dir
+        (cd "$1"; pwd)
+    elif [ -f "$1" ]; then
+        # file
+        if [[ $1 = /* ]]; then
+            echo "$1"
+        elif [[ $1 == */* ]]; then
+            echo "$(cd "${1%/*}"; pwd)/${1##*/}"
+        else
+            echo "$(pwd)/$1"
+        fi
+    fi
+}
+
+# set environment variable for current working directory
+# $1 : name
+# $2 : path
+swd(){
+	local prefix="wd"
+	if [[ $# != 1 ]]; then
+		## wrong number of parameters given
+		echo "swd: missing operand"
+		echo "Usage: swd NAME"$'\n'
+		echo "E.g. 'swd foo' will create an alias wdfoo=$(unix2win $PWD)"$'\n'
+		echo "alias list:"
+		cat ~/.wd-aliases
+	else
+		name="$prefix$1"
+		sed -i "/${name}/d" ~/.wd-aliases
+		echo "alias $name=\"cd '$(pwd)'\"" >> ~/.wd-aliases
+		bash
+		echo "$name set to $(unix2win $(pwd))"
+	fi
+}
+
+# navigate to directory with saved name
+# $1 : name
+wd(){
+local prefix="WD-"
+	if [[ $# == 1 ]]; then
+		local path=$(printenv "$prefix$1")wd
+		cd "$path"
+	else
+		echo "wd: missing operand"
+		echo "Usage: wd NAME"$'\n'
+		# show all set aliases
+		echo "alias list:"
+		env | grep "$prefix"
+	fi
+
+}
