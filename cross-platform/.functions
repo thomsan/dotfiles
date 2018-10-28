@@ -237,6 +237,10 @@ unix2win () {
   echo "$1" | sed 's/\///' | sed 's/\//:\//' | sed 's/\\ / /' | sed 's/\//\\/g'
 }
 
+dl_song(){	
+	youtube-dl --ignore-config -x --audio-format m4a --audio-quality 0 --postprocessor-args '-strict -2' -o "%(title)s.%(ext)s" $@
+}
+
 # generate absolute path from relative path
 # $1     : relative filename
 # return : absolute path
