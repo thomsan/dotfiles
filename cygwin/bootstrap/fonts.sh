@@ -4,7 +4,7 @@
 DIR=$(cygpath -w "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )")
 FONTS_DIR=$(cygpath -w "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd '../../fonts' && pwd )")
 # check if fonts are maybe already installed
-check_res=`powershell -ExecutionPolicy Bypass "${DIR}/check-fonts.ps1"`
+check_res=`powershell -ExecutionPolicy Bypass "'${DIR}/check-fonts.ps1'"`
 # exit code will be 1 if not installed yet
 if [[ $? == 1 ]]; then
   info "$check_res"
