@@ -1,4 +1,4 @@
-# burnedikt's dotfiles
+# thomsan's dotfiles
 
 ## Disclaimer
 
@@ -30,7 +30,7 @@ On Windows, fire up an **elevated Powershell** (run as admin), cd to the dotfile
     .\bootstrap.ps1`
     ```
 
-After the pre-requisites (git-bash, ...) have been installed, open up babun and
+After the pre-requisites (git-bash, ...) have been installed, open up babun (as admin) and
 cd into the dotfiles folder. Here, just run `. ./bootstrap` to proceed with the default installation as on UNIX systems.
 
 ### Manual Labor

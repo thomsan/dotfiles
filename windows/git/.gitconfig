@@ -1,9 +1,8 @@
 [user]
-	name = Benedikt Reiser
-	email = benedikt.reiser@gmail.com
+	name = Thomas Ascioglu
+	email = thomasascioglu@gmail.com
 [core]
-	#editor = "'C:/Program Files/Sublime Text 3/sublime_text.exe' -w"
-  editor = "'C:/Program Files/Microsoft VS Code/code.exe' --wait --new-window"
+	editor = "'C:/Program Files/Microsoft VS Code/code.exe' --wait --new-window"
 [diff]
     tool = default-difftool
 [difftool "default-difftool"]

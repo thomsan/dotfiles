@@ -1,8 +1,7 @@
 [user]
-	name = Benedikt Reiser
-	email = benedikt.reiser@gmail.com
+	name = Thomas Ascioglu
+	email = thomasascioglu@gmail.com
 [core]
-	excludesfile = /Users/benediktreiser/.gitignore_global
 	editor = subl -n -w
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
@@ -23,5 +22,3 @@
 	concurrenttransfers = 10
 [lfs "transfer"]
 	maxretries = 3
-[commit]
-	template = /Users/benediktreiser/.stCommitMsg

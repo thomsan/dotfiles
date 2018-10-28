@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
-# get the path to the sublime folder
+#PROGRAM_FILES=$(win2unix "$PROGRAMFILES")
 PROGRAM_FILES=$(cygpath $ProgramW6432)
+
+# path to sublime
 alias sublime='"${PROGRAM_FILES}/Sublime Text 3/subl.exe"'
 alias subl="sublime"
 alias s="subl"
+
+# path to notepad++
+alias npp='"${PROGRAM_FILES}/Notepad++/notepad++.exe"'
+alias n++="npp"
+
+# fast directory interactions
+alias exp="explorer ."
