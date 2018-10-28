@@ -296,5 +296,23 @@ local prefix="WD-"
 		echo "alias list:"
 		env | grep "$prefix"
 	fi
+}
 
+# Returns a list of all .png.meta files in the directory and subdirectories
+get_all_png_meta_files () {
+	find . | while read file; do
+		if [[ ${file: -8} == "png.meta" ]]; then
+			echo $file
+		fi
+	done
+}
+
+# Edits Unity meta files for images so they can be used as image tracker
+#- enableMipMap 0
+#- isReadable 1
+#- nPOTScale 0
+toMLimageTracker () {
+	while read file; do
+		sed -i -e 's/enableMipMap: 1/enableMipMap: 0/g;s/isReadable: 0/isReadable: 1/g;s/nPOTScale: 1/nPOTScale: 0/g' "$file"
+	done
 }
