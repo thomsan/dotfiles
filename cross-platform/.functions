@@ -129,12 +129,16 @@ symlink() {
   if [[ "$skip" != "true" ]]; then # "false" or empty.
     mkdir -p "$(dirname "$dst")"
     # Create symlinks on Windows.
-	if [ -d "${dst}" ] ; then
+	if [[ -d $src ]]; then
+		echo "DIRECTORY"
 		#directory
-		cmd <<< "mklink /J $(unix2win "$dst") $(unix2win "$src")"
-	elif [ -f "${dst}" ]; then
+		cmd <<< "mklink /J \"$(unix2win "$dst")\" \"$(unix2win "$src")\"" > /dev/null
+	elif [[ -f $src ]]; then
 		#file
-		cmd <<< "mklink $(unix2win "$dst") $(unix2win "$src")"
+		echo "File"
+		cmd <<< "mklink  \"$(unix2win "$dst")\" \"$(unix2win "$src")\"" > /dev/null
+	else
+		fail "Can't symlink. Source is not valid: $src"
 	fi
 	
     if [[ $? == 0 ]]; then
