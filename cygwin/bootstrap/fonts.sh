@@ -12,5 +12,5 @@ if [[ $? == 1 ]]; then
   powershell -ExecutionPolicy Bypass "${FONTS_DIR}/install.ps1"
   success "$(printf "%bPowerline%b fonts successfully installed" $light_green $reset_color)"
 else
-  warn "$check_res"
+  warn "$(win2unix $check_res)"
 fi

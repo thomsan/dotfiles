@@ -73,8 +73,7 @@ symlink() {
        [[ "$backup_all" == "false" ]] && \
        [[ "$skip_all" == "false" ]]; then
       local current_target="$(readlink "$dst")"
-      echo $current_target
-      echo $src
+
       if [[ "$current_target" == "$src" ]]; then
         skip=true;
       else
@@ -130,7 +129,14 @@ symlink() {
   if [[ "$skip" != "true" ]]; then # "false" or empty.
     mkdir -p "$(dirname "$dst")"
     # Create symlinks on Windows.
-	cmd <<< "mklink $(unix2win "$dst") $(unix2win "$src")" > /dev/null
+	if [ -d "${dst}" ] ; then
+		#directory
+		cmd <<< "mklink /J $(unix2win "$dst") $(unix2win "$src")"
+	elif [ -f "${dst}" ]; then
+		#file
+		cmd <<< "mklink $(unix2win "$dst") $(unix2win "$src")"
+	fi
+	
     if [[ $? == 0 ]]; then
       success "$(printf "Linked %b%s%b to %b%s%b" $green "$src" $reset_color $green "$dst" $reset_color)"
     else

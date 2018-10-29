@@ -10,7 +10,7 @@ link_dotfiles() {
   # (git-)bash
   link_dotfiles_from_folder "$DOTFILES_ROOT/windows/bash"
   # windows specific aliases
-  symlink "$DOTFILES_ROOT/cygwin/.win-aliases $HOME/.win-aliases"
+  symlink "$DOTFILES_ROOT/cygwin/.win-aliases" "$HOME/.win-aliases"
 }
 # go ahead
 link_dotfiles
