@@ -278,10 +278,10 @@ swd(){
 	local prefix="wd"
 	if [[ $# != 1 ]]; then
 		## wrong number of parameters given
-		echo "swd: missing operand"
-		echo "Usage: swd NAME"$'\n'
-		echo "E.g. 'swd foo' will create an alias wdfoo=$(unix2win $PWD)"$'\n'
-		echo "alias list:"
+		echo "swd: missing operand" $'\n'
+		echo "Usage: swd NAME"
+		echo "e.g. 'swd foo' will create an alias wdfoo=$(unix2win "$PWD")" $'\n'
+		echo "Alias list:"
 		cat ~/.wd-aliases
 	else
 		name="$prefix$1"
