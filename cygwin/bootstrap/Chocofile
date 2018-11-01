@@ -33,3 +33,4 @@ ruby
 sudo
 wget
 curl
+ffmpeg

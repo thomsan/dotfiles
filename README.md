@@ -43,6 +43,6 @@ The [sublime text icon](sublime/icon.icns) (all thanks goes to [Yannik Siebert](
 
 #### Windows
 
-#### Sublime Text Package Control
+##### Sublime Text Package Control
 
 The Cocolatey package 'sublimetext3.packagecontrol' is broken so we need to set it up manually (see: https://packagecontrol.io/installation)
