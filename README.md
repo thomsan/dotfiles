@@ -27,7 +27,7 @@ On Windows, fire up an **elevated Powershell** (run as admin), cd to the dotfile
 2. execute the `bootstrap.ps1` powershell script, by running
 
     ```
-    .\bootstrap.ps1`
+    .\bootstrap.ps1
     ```
 
 After the pre-requisites (git-bash, ...) have been installed, open up babun (as admin) and
