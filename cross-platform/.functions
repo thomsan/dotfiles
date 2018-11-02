@@ -292,22 +292,6 @@ swd(){
 	fi
 }
 
-# navigate to directory with saved name
-# $1 : name
-wd(){
-local prefix="WD-"
-	if [[ $# == 1 ]]; then
-		local path=$(printenv "$prefix$1")wd
-		cd "$path"
-	else
-		echo "wd: missing operand"
-		echo "Usage: wd NAME"$'\n'
-		# show all set aliases
-		echo "alias list:"
-		env | grep "$prefix"
-	fi
-}
-
 # Returns a list of all .png.meta files in the directory and subdirectories
 get_all_png_meta_files () {
 	find . | while read file; do
