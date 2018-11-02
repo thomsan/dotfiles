@@ -34,3 +34,4 @@ sudo
 wget
 curl
 ffmpeg
+cmake
