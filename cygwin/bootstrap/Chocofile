@@ -38,5 +38,6 @@ ruby
 sudo
 wget
 curl
+nmap
 ffmpeg
 cmake
