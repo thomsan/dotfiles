@@ -37,6 +37,7 @@ python
 ruby
 sudo
 wget
+putty
 curl
 nmap
 ffmpeg
