@@ -20,13 +20,18 @@ treesizefree
 ccleaner
 bulk-crap-uninstaller
 freefilesync
+lastpass
+boxcryptor
+dropbox
 filezilla
+wireshark
 putty.install
 postman
 googlechrome
 firefox
 opera
 javaruntime
+androidstudio
 nvm
 golang
 nodejs
@@ -34,6 +39,8 @@ python
 ruby
 sudo
 wget
+putty
 curl
+nmap
 ffmpeg
 cmake
