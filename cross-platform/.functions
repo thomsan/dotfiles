@@ -255,7 +255,6 @@ dl_song(){
 # $1     : relative filename
 # return : absolute path
 function abspath() {
-    
     if [ -d "$1" ]; then
         # dir
         (cd "$1"; pwd)
@@ -309,4 +308,46 @@ toMLimageTracker () {
 	while read file; do
 		sed -i -e 's/enableMipMap: 1/enableMipMap: 0/g;s/isReadable: 0/isReadable: 1/g;s/nPOTScale: 1/nPOTScale: 0/g' "$file"
 	done
+}
+
+# Create a numbered squence of all images in the directory
+createSequence(){
+	if [[ $# != 2 ]]; then
+		## wrong number of parameters given
+		echo "createSequence: missing operand" $'\n'
+		echo "Usage: createSequence [DIRECTORY] [FILEXTENSION]"
+	else
+		if [ -d "$1" ]; then
+			# dir
+			dir="$1"
+			ext="$2"
+			find "$dir" -name "*$ext" | gawk 'BEGIN{a=1}{ printf "cp \"%s\" ./tmp/image%04d.jpg\n", $0, a++ }' | bash
+		elif [ -f "$1" ]; then
+			# file
+			echo "createSequence: no directory" $'\n'
+			echo "Usage: createSequence [DIRECTORY] [FILEXTENSION]"
+		fi
+	fi
+}
+ 
+
+# Create a portrait 1080x1920 video from all images in the folder
+createVideo(){
+	if [[ $# != 2 ]]; then
+			## wrong number of parameters given
+			echo "createVideo: missing operand" $'\n'
+			echo "Usage: createVideo [DIRECTORY] [FILEXTENSION]"
+	else
+		if [ -d "$1" ]; then
+			# dir
+			mkdir "$1"/tmp
+			createSequence "$1" "$2"
+			ffmpeg -framerate 1 -i $1/tmp/image%04d.jpg -c:v libx264 -r 30 -pix_fmt yuv420p -vf "transpose=2,scale=1080:1920" out.mp4
+			rm -r ./tmp
+		elif [ -f "$1" ]; then
+			# file
+			echo "createVideo: no directory" $'\n'
+			echo "Usage: createVideo [DIRECTORY] [FILEXTENSION]" "$(pwd)/$1"
+		fi
+	fi
 }
