@@ -35,10 +35,12 @@ androidstudio
 nvm
 golang
 nodejs
-python
+anaconda3
+visualstudio2015community
 pycharm
 octave
 ruby
+coffeescript
 sudo
 wget
 putty
