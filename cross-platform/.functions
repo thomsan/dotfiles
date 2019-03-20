@@ -351,3 +351,39 @@ createVideo(){
 		fi
 	fi
 }
+
+exportFrames(){
+  if [[ $# != 1 ]]; then
+			## wrong number of parameters given
+			echo "exportFrames: missing operand" $'\n'
+			echo "Usage: exportFrames [FILEPATH]"
+	else
+		if [ -d "$1" ]; then
+			# dir
+			echo "exportFrames: directory given instead of file" $'\n'
+			echo "Usage: exportFrames [FILEPATH]" "$1"
+		
+		elif [ -f "$1" ]; then
+			# file
+      mkdir "$1-frames"
+      ffmpeg -i $1 "$1-frames/$1-frame%05d.png"
+			fi
+	fi
+}
+
+exportFramesAll(){
+  if [[ $# != 1 ]]; then
+			## wrong number of parameters given
+			echo "exportFrames: missing operand" $'\n'
+			echo "Usage: exportFramesAll [DIRPATH]"
+	else
+		if [ -d "$1" ]; then
+      # dir
+      for filename in *.mp4 ; do exportFrames $filename ; done
+    elif [ -f "$1" ]; then
+			# file
+			echo "exportFrames: file given instead of directory" $'\n'
+			echo "Usage: exportFramesAll [DIRPATH]" "$1"
+    fi
+	fi
+}
