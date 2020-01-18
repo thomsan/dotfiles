@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 PROGRAM_FILES=$(win2unix "$PROGRAMFILES")
+PROGRAM_FILES_X86="/C/Program\ Files\ \(x86\)"
 #PROGRAM_FILES=$(cygpath $ProgramW6432)
 
 # path to sublime
@@ -14,6 +15,9 @@ alias n++="npp"
 # path to visual studio code
 alias vscode="${PROGRAM_FILES}/Microsoft\ VS\ Code/Code.exe"
 alias code="vscode"
+
+# path to vlc player
+alias vlc="${PROGRAM_FILES_X86}/VideoLAN/VLC/vlc.exe"
 
 # fast directory interactions
 alias exp="explorer ."
