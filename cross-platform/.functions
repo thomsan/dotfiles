@@ -387,3 +387,36 @@ exportFramesAll(){
     fi
 	fi
 }
+
+# AUDIO CONVERSION
+
+# Converst input audio file to wav
+
+toWav() {
+  if [[ $# != 2 ]]; then
+			## wrong number of parameters given
+			echo "toWav: wrong number of input parameters" $'\n'
+			echo "Usage: toWav [INPUT_FILE] [OUTPUT_FILE]"
+	else
+		ffmpeg -i $1 $2 -v error -y
+	fi
+}
+
+m4aToWavAll () {
+  echo "Not working for spaces in paths!!!\nFix function: spaces need to be escaped in path"
+  if [[ $# != 2 ]]; then
+			## wrong number of parameters given
+			echo "m4aToWavAll: wrong number of input parameters" $'\n'
+			echo "Usage: m4aToWavAll [INPUT_DIR] [OUTPUT_DIR]"
+	else
+		if [ -d "$1" ] && [ -d "$2" ]; then
+      for filename in *.m4a ; do
+        outputFile="$2/$filename.wav"
+        echo "Saving output file to $outputFile"
+        toWav $filename $outputFile ; done
+    else
+			echo "m4aToWavAll: one is Not a directory" $1, $2'\n'
+			echo "Usage: m4aToWavAll [INPUT_DIR] [OUTPUT_DIR]"
+    fi
+	fi
+}
