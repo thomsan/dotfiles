@@ -1,0 +1,29 @@
+light_red="\e[01;31m"
+green="\e[0;32m"
+light_green="\e[01;32m"
+light_yellow="\e[01;33m"
+cyan="\e[0;36m"
+light_cyan="\e[01;36m"
+reset_color="\e[0m"
+clear_line="\e[2K"
+
+info() {
+  printf   "\r[%bINFO%b] %b\n" $light_cyan $reset_color "$1"
+}
+
+user() {
+  printf   "\r[%b ?  %b] %b\n" $light_yellow $reset_color "$1"
+}
+
+warn() {
+  printf   "\r[%bWARN%b] %b\n" $light_yellow $reset_color "$1"
+}
+
+success() {
+  printf "\r%b[%b OK %b] %b\n" $clear_line $light_green $reset_color "$1"
+}
+
+fail() {
+  printf "\r%b[%bFAIL%b] %b\n\n" $clear_line $light_red $reset_color "$1"
+  exit 1
+}

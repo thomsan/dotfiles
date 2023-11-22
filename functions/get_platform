@@ -1,0 +1,17 @@
+# 
+# Determine the platform we're on
+# 
+# Uuse like this:
+# if [[ "$(get_platform)" == 'linux' ]]; then
+#   ...
+# fi
+#
+get_platform() {
+  case "$OSTYPE" in
+    linux*)  printf 'linux';;
+    darwin*) printf 'macos';;
+    msys)    printf 'windows';;
+    cygwin)  printf "cygwin";;
+    *)       printf "$OSTYPE";;
+  esac
+}

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+info 'installing user pip packages'
+python -m pip install --user $(grep -v -e '^\s*$' -e '^\s*#' topics/pip/pip-packages)
+success 'user pip packages installed'
+
+ 

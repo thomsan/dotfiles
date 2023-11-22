@@ -1,0 +1,41 @@
+setup_gitconfig () {
+    info 'setup gitconfig'
+    if ! [ -f topics/git/gitconfig.local.symlink ]
+    then
+        platform=`get_platform`
+        echo $platform
+
+        git_credential='cache'
+        if [ "$platform" == "darwin" ]
+        then
+            git_credential='osxkeychain'
+        elif [ "$platform" == "linux" ]
+        then
+            info 'Installing libsecret for managing git credentials'
+            sudo apt install libsecret-1-0 libsecret-1-dev
+            sudo make --directory=/usr/share/doc/git/contrib/credential/libsecret
+            git_credential='/usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret'
+            gpg_program='gpg'
+        fi
+
+        user ' - What is your github author name?'
+        read -e git_authorname
+        user ' - What is your github author email?'
+        read -e git_authoremail
+        
+
+        # escape git_credentials sed delimiter /
+        git_credential=$(echo $git_credential | sed -e 's/[\/&]/\\&/g')
+        cp topics/git/gitconfig.local.symlink.example topics/git/gitconfig.local.symlink
+        sed -i "s/AUTHORNAME/$git_authorname/g" topics/git/gitconfig.local.symlink
+        sed -i "s/AUTHOREMAIL/$git_authoremail/g" topics/git/gitconfig.local.symlink
+        sed -i "s/GIT_CREDENTIAL_HELPER/$git_credential/g" topics/git/gitconfig.local.symlink
+        sed -i "s/GPG_PROGRAM/$gpg_program/g" topics/git/gitconfig.local.symlink
+        
+        success 'gitconfig setup finished'
+    else
+        success 'gitconfig already set up'
+    fi
+    
+    
+}

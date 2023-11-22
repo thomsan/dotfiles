@@ -1,0 +1,81 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# If set, the pattern "**" used in a pathname expansion context will
+# match all files and zero or more directories and subdirectories.
+shopt -s globstar
+
+# shortcut to this dotfiles path is $DOTFILES
+export DOTFILES=$HOME/.dotfiles
+
+# your project folder that we can `cd` to
+export PROJECTS=~/projects
+
+# find out which platform we're running on
+source $DOTFILES/functions/get_platform
+platform=`get_platform`
+
+# Stash your environment variables in ~/.localrc. This means they'll stay out
+# of your main dotfiles repository (which may be public, like this one), but
+# you'll have access to them in your scripts.
+if [[ -a ~/.localrc ]]
+then
+  source ~/.localrc
+fi
+
+# load all our bash filess
+bash_files=($DOTFILES/**/*.bash)
+for file in "${bash_files[@]}"; do
+  source $file
+done
+unset bash_files
+
+# all of our shell files
+config_files=($DOTFILES/**/*.shell)
+
+# load the path files
+for file in "${config_files[@]}"; do
+  if [[ $file == *"/path.shell" ]]; then
+    source $file
+  fi
+done
+
+# Alias definitions
+# We store our aliases in topic seperated $DOTFILES/**/aliases.shell files.
+#
+# Additionally let's also load everything in ~/.bash_aliases.
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+# load everything but the path and completion files
+for file in "${config_files[@]}"; do
+  if [[ $file != *"/path.shell" ]] && [[ $file != *"/completion.shell" ]]; then
+    source $file
+  fi
+done
+
+# initialize autocomplete here, otherwise functions won't be loaded
+if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
+    . /etc/bash_completion
+fi
+
+# load every completion after autocomplete loads
+for file in "${config_files[@]}"; do
+  if [[ $file == *"/completion.shell" ]]; then
+    source $file
+  fi
+done
+
+unset config_files
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

@@ -1,0 +1,25 @@
+# Local/private config goes in the include
+[include]
+        path = ~/.gitconfig.local
+[color]
+        branch = auto
+        diff = auto
+        status = auto
+        ui = true
+[core]
+        excludesfile = ~/.gitignore
+        editor = "code --wait --new-window"
+[mergetool]
+        keepBackup = false
+[diff]
+        tool = default-difftool
+[difftool "default-difftool"]
+        cmd = "code --new-window --wait --diff $LOCAL $REMOTE"
+[help]
+        autocorrect = 1
+[push]
+        default = simple
+[init]
+	defaultBranch = main
+[pull]
+	rebase = true

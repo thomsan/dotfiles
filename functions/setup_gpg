@@ -1,0 +1,41 @@
+setup_gpg () {
+    info 'setting up gpg'
+    # check if GPG_SIGNINGKEY was disabled before
+    if grep -q "#GPG_SIGNINGKEY" topics/git/gitconfig.local.symlink
+    then
+        sed -i "s/#GPG_SIGNINGKEY/GPG_SIGNINGKEY/g" topics/git/gitconfig.local.symlink
+    elif ! grep -q "GPG_SIGNINGKEY" topics/git/gitconfig.local.symlink
+    then
+        success 'gpg already set up'
+        return
+    fi
+
+    user ' - Do you want to sign commits using GPG? (y/n)'
+    read -e sign_commits
+    if [ "$sign_commits" == "y" ]
+    then
+        user ' - Do you already have a GPG signing key? (y/n)'
+        read -e has_gpg_key
+        if [ "$has_gpg_key" == "n" ]
+        then
+            info ' - Generating a new GPG key'
+            gpg --gen-key
+        fi
+        gpg --list-secret-keys --keyid-format LONG
+        user ' - Which of the above is your GPG key id:'
+        
+        read -e gpg_signingkey_id
+        echo ''
+        gpg --armor --export $gpg_signingkey_id
+        echo ''
+        user ' - Please copy the GPG key above and add it on your github account: https://github.com/settings/keys'
+        user ' - Press Enter to continue'
+        read -e
+        sed -i "s/GPG_SIGNINGKEY/$gpg_signingkey_id/g" topics/git/gitconfig.local.symlink
+        sed -i "s/gpgSign = false/gpgSign = true/g" topics/git/gitconfig.local.symlink
+    else
+        sed -i "s/GPG_SIGNINGKEY/#GPG_SIGNINGKEY/g" topics/git/gitconfig.local.symlink
+        sed -i "s/gpgSign = true/gpgSign = false/g" topics/git/gitconfig.local.symlink
+    fi
+    success 'gpg setup finished'
+}

@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+# This script is used to bootstrap a new machine.
+
+DOTFILES_ROOT=$(pwd -P)
+
+set -e
+
+# include all functions
+for file in $DOTFILES_ROOT/functions/*; do
+  source $file
+done
+
+install_dotfiles () {
+  info 'installing dotfiles'
+
+  local overwrite_all=false backup_all=false skip_all=false
+
+  for src in $(find -H "$DOTFILES_ROOT/topics" -maxdepth 2 -name '*.symlink' -not -path '*.git*')
+  do
+    dst="$HOME/.$(basename "${src%.*}")"
+    link_file "$src" "$dst"
+  done
+  success 'dotfiles installation finished'
+}
+
+run_topic_bootstrap_files () {
+  info 'running topic specific bootstrap files'
+
+  for src in $(find -H "$DOTFILES_ROOT/topics/" -maxdepth 2 -name '*.bootstrap' -not -path '*.git*')  
+  do
+    info "running $src"
+    source "$src"
+  done
+  success 'topic bootstrap finished'
+}
+
+run_platform_bootstrap_files () {
+  platform=`get_platform`
+  info 'running platform specific bootstrap files'
+  info $platform
+
+  for src in $(find -H "$DOTFILES_ROOT/$platform" -maxdepth 2 -name '*.bootstrap' -not -path '*.git*')  
+  do
+    info "running $src"
+    source "$src"
+  done
+  success 'platform bootstrap files finished'
+}
+
+setup_gitconfig
+echo ''
+setup_gpg
+echo ''
+install_dotfiles
+echo ''
+run_topic_bootstrap_files
+echo ''
+run_platform_bootstrap_files
+echo ''
+success 'bootstrap complete'
+

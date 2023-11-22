@@ -1,0 +1,16 @@
+# This file is used by .bootstrap
+#
+# Put snap packages here that should be installed on your system
+# One package per line 
+# Empty lines and lines starting with # are ignored
+# 
+
+######### development #########
+# Postman is a collaboration platform for API development
+postman
+
+slack
+discord
+
+# Visual Studio Code
+code --classic
