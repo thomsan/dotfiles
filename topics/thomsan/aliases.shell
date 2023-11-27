@@ -2,4 +2,4 @@
 alias p='cd ~/projects'
 alias drop='cd ~/Dropbox'
 alias oc='cd ~/OwnCloud'
-
+alias emr='cd ~/projects/emrsiv'
