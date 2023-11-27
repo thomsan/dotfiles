@@ -1,60 +1,89 @@
 # This file is used by .bootstrap
+
 #
+
 # Put apt packages here that should be installed on your system
+
 # One package per line
+
 # Empty lines and lines starting with # are ignored
-# 
+
+#
 
 ######### development #########
+
 # build-essential contains a list of packages which are essential for compiling software. They include the GNU debugger, g++/GNU compiler collection, and some more tools and libraries
+
 build-essential
 
 # git is a free and open source distributed version control system
+
 git
 
 # git-lfs is an open source Git extension for versioning large files
+
 git-lfs
 
 # docker is a set of platform as a service products that use OS-level virtualization to deliver software in packages called containers
+
 docker.io
 
-
 ######### network #########
-# nmap is a free and open-source command-line tool used for network discovery, vulnerability checking, port scanning, and network mapping. 
+
+# nmap is a free and open-source command-line tool used for network discovery, vulnerability checking, port scanning, and network mapping.
+
 nmap
 
 ######### tools #########
+
 # direnv allows project-specific environment variables without cluttering the ~/.profile file
+
 direnv
 
 # zsh is a Unix shell that can be used as an interactive login shell and as a command interpreter for shell scripting
+
 zsh
 
 # tree displays the directory structure in a tree-like format
+
 tree
 
 # KeepassXC is a free and open-source password manager
+
 keepassxc
 
+# trash-cli is a command line interface to move files and folders to the trash instead of using rm which permanently deletes files
+
+trash-cli
+
 ######### media #########
+
 # vlc is a free and open-source media player
+
 vlc
+
 #
+
 spotify-client
 
 ######### languages #########
 
 # python is an interpreted, high-level, general-purpose programming language
+
 python3
 
 # python3-pip is the package installer for Python
+
 python3-pip
 
 # python3-gpg is a Python wrapper for GPG
+
 python3-gpg
 
 # nodejs is a JavaScript runtime built on Chrome's V8 JavaScript engine
+
 nodejs
 
 # npm is the package manager for nodejs
-npm 
+
+npm
