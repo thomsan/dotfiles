@@ -1,6 +1,9 @@
 alias k8s-logs='kubectl logs -f'
-alias k8s-logs-pod-last-hour='k8s-logs --since=1h'
-alias k8s-logs-pod-tail='k8s-logs --tail=100'
+alias k8s-logs-since-1m='k8s-logs --since=1m'
+alias k8s-logs-since-10m='k8s-logs --since=10m'
+alias k8s-logs-since-1h='k8s-logs --since=1h'
+alias k8s-logs-tail-100='k8s-logs --tail=100'
+alias k8s-logs-tail-10='k8s-logs --tail=10'
 
 
 alias k3s-logs='echo Use k8s-logs instead of k3s-logs'
