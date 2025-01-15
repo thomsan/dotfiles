@@ -1,4 +1,5 @@
 alias gc='git commit'
+alias gcm='git commit -m'
 alias gca='git commit -a'
 alias gac='git add -A && git commit -m'
 alias gcam='git commit --amend --no-edit' # add to previous commit
@@ -8,6 +9,7 @@ alias gb='git branch'
 alias gs='git status -sb' # upgrade your git if -sb breaks for you. it's fun.
 alias gp='git push'
 alias gf='git fetch'
+alias gl='git log --oneline'
 alias gr2='git rebase -i HEAD~2'
 alias gr5='git rebase -i HEAD~5'
 alias gr10='git rebase -i HEAD~10'
