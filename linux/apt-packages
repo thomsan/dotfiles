@@ -66,13 +66,17 @@ keepassxc
 
 trash-cli
 
+# Google Chrome Browser
+
+google-chrome-stable
+
 ######### media #########
 
 # vlc is a free and open-source media player
 
 vlc
 
-#
+# Spotify
 
 spotify-client
 
