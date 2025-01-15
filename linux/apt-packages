@@ -43,6 +43,9 @@ nmap
 
 ######### tools #########
 
+# 7zip
+p7zip-full
+
 # direnv allows project-specific environment variables without cluttering the ~/.profile file
 
 direnv
