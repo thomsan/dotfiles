@@ -1,2 +1,7 @@
+python3-venv
 virtualenv
 virtualenvwrapper
+
+# twine is a utility for publishing python packages on PyPI
+
+twine
