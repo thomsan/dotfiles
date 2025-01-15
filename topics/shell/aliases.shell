@@ -11,7 +11,7 @@ alias dot='cd ~/.dotfiles'
 alias doc='cd ~/Documents'
 
 # Open Files explorer at current dir
-alias exp="nautilus ."
+alias exp="nautilus . &"
 
 alias cls='clear' # clear screen
 
