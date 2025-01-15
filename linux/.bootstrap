@@ -6,6 +6,11 @@ info 'installing wget and curl'
 sudo apt install wget curl -y
 success 'wget and curl installed'
 
+info 'adding apt repositories'
+
+# TODO do I want to auto add apt repositories?
+
+success 'added apt repositories'
 
 sudo apt update
 
@@ -35,3 +40,8 @@ sudo groupadd -f docker
 sudo usermod -aG docker $USER
 newgrp docker
 success 'docker permissions set'
+
+info 'cloning flutter'
+mkdir -p ~/others
+git clone git@github.com:flutter/flutter.git ~/others/flutter
+success 'flutter cloned'
