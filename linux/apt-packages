@@ -28,6 +28,13 @@ git-lfs
 
 docker.io
 
+# flutter tool chain
+
+clang
+cmake
+ninja-build
+libgtk-3-dev
+
 ######### network #########
 
 # nmap is a free and open-source command-line tool used for network discovery, vulnerability checking, port scanning, and network mapping.
