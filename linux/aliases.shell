@@ -1,1 +1,13 @@
+# network
 alias mdns-list-devices="avahi-browse -at"
+# get all ips and scann all interfaces
+alias get-ip-with-subnet="ip -o -f inet addr show | awk '/scope global/ {print \$4}' | awk 'NR==1'"
+alias my-ip="ip route get 1.2.3.4 | awk '{print \$7}' | head -n 1"
+alias scan-network="nmap -sP -oG - \$(get-ip-with-subnet)"
+alias get-ips="ip -o -f inet addr show | awk '/scope global/ {print \$4}'"
+alias scan-network-all-interfaces="nmap -sP -oG - \$(get-ips)"
+alias youtube-dl="yt-dlp"
+alias dl-song-from-yt-as-m4a="youtube-dl -x --audio-format m4a"
+alias dl-song-from-yt-as-mp3="youtube-dl -x --audio-format mp3"
+alias dl-song-from-bandcamp="bandcamp-dl --template='./%{artist} - %{title}'"
+alias dl-song-from-soundcloud="scdl --flac -l"
