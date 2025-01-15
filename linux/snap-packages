@@ -11,6 +11,10 @@ postman
 
 slack
 discord
+zoom-client
 
 # Visual Studio Code
 code --classic
+
+# Gimp is an image editor
+gimp
