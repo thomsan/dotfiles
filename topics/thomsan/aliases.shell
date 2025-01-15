@@ -3,3 +3,12 @@ alias p='cd ~/projects'
 alias drop='cd ~/Dropbox'
 alias oc='cd ~/OwnCloud'
 alias emr='cd ~/projects/emrsiv'
+alias enc='cd ~/encryption-space'
+
+# Override diff command to use code
+alias diff='code --diff'
+
+alias prio-wifi-over-lan='sudo ifmetric wlp2s0 50'
+
+# ssh tunnel
+alias ssh-tunnel-k8s-tom-nas-rpi='ssh -L 6443:localhost:6443 pi@release.emrsiv.space -p 8022'
