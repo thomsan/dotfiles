@@ -62,23 +62,12 @@ tree
 
 keepassxc
 
-# trash-cli is a command line interface to move files and folders to the trash instead of using rm which permanently deletes files
-
-trash-cli
-
-# Google Chrome Browser
-
-google-chrome-stable
 
 ######### media #########
 
 # vlc is a free and open-source media player
 
 vlc
-
-# Spotify
-
-spotify-client
 
 ######### languages #########
 
