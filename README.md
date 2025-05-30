@@ -19,6 +19,9 @@ There are a few special files in the hierarchy:
 - **topic/\*.zsh**: Any files ending in .zsh get loaded into your zsh environment.
 - **topic/completion.sh**: Any file named completion.sh is loaded last and is expected to setup autocomplete.
 
+## Prerequisites
+* python ```sudo apt install python-is-python3```
+* pip `sudo apt install python3-pip`
 
 ## Installation
 
