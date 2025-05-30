@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 info 'installing user pip packages'
-python -m pip install --user $(grep -v -e '^\s*$' -e '^\s*#' topics/pip/pip-packages)
+sudo apt install python3-venv
+python -m pip install --user --break-system-packages $(grep -v -e '^\s*$' -e '^\s*#' topics/pip/pip-packages)
 success 'user pip packages installed'
 
  
