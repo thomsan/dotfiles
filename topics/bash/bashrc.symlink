@@ -82,3 +82,20 @@ export NVM_DIR="$HOME/.nvm"
 
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/thomsan/miniforge3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/thomsan/miniforge3/etc/profile.d/conda.sh" ]; then
+        . "/home/thomsan/miniforge3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/thomsan/miniforge3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+. "$HOME/.cargo/env"

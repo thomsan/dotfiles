@@ -1,0 +1,1 @@
+alias conda-load-bash='eval "$(/home/thomsan/miniforge3/bin/conda shell.bash hook)"'
