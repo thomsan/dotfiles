@@ -12,3 +12,5 @@ alias prio-wifi-over-lan='sudo ifmetric wlp2s0 50'
 
 # ssh tunnel
 alias ssh-tunnel-k8s-tom-nas-rpi='ssh -L 6443:localhost:6443 pi@release.emrsiv.space -p 8022'
+
+alias emrsiv-core='cd ~/projects/emrsiv/emrsiv-core/ && source .venv/bin/activate && ./dist/emrsiv-core'
