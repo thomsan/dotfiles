@@ -1,0 +1,39 @@
+#
+# Interactive network client scanner
+#
+scan-network() {
+    local ifaces cidrs display idx
+    local IFS=$'\n'
+
+    # Build arrays of interfaces and CIDRs.
+    for line in $(get_interfaces); do
+        ifaces+=( "$(awk '{print $1}' <<< "$line")" )
+        cidrs+=(  "$(awk '{print $2}' <<< "$line")" )
+        display+=( "$(printf '%-8s %s' "${ifaces[-1]}" "${cidrs[-1]}")" )
+    done
+
+    # Bail if nothing to scan.
+    if [[ ${#cidrs[@]} -eq 0 ]]; then
+        echo "No global-scope IPv4 addresses found."
+        return 1
+    fi
+
+    # If only one NIC, skip the menu.
+    if [[ ${#cidrs[@]} -eq 1 ]]; then
+        idx=0
+    else
+        echo "Pick the interface / subnet to scan:"
+        select choice in "${display[@]}" "Quit"; do
+            case $REPLY in
+                ''|*[!0-9]*) echo "Enter a number."; continue ;;
+                *) (( REPLY-- )); idx=$REPLY; break ;;
+            esac
+        done
+        [[ $choice == "Quit" ]] && return 0
+    fi
+
+    echo "▶ Scanning ${ifaces[idx]} (${cidrs[idx]}) …"
+    # -sn     : ping sweep (preferred over deprecated -sP)
+    # --stats : progress every 2 s
+    nmap -sn --stats-every 2s -oG - "${cidrs[idx]}"
+}

@@ -12,14 +12,18 @@ esac
 # match all files and zero or more directories and subdirectories.
 shopt -s globstar
 
-# shortcut to this dotfiles path is $DOTFILES
-export DOTFILES=$HOME/.dotfiles
+# shortcut to this dotfiles path is $DOTFILES_ROOT
+export DOTFILES_ROOT=$HOME/.dotfiles
 
 # your project folder that we can `cd` to
 export PROJECTS=~/projects
 
+# Load all functions
+for file in $DOTFILES_ROOT/functions/*; do
+  source $file
+done
+
 # find out which platform we're running on
-source $DOTFILES/functions/get_platform
 platform=`get_platform`
 
 # Stash your environment variables in ~/.localrc. This means they'll stay out
@@ -31,14 +35,14 @@ then
 fi
 
 # load all our bash filess
-bash_files=($DOTFILES/**/*.bash)
+bash_files=($DOTFILES_ROOT/**/*.bash)
 for file in "${bash_files[@]}"; do
   source $file
 done
 unset bash_files
 
 # all of our shell files
-config_files=($DOTFILES/**/*.shell)
+config_files=($DOTFILES_ROOT/**/*.shell)
 
 # load the path files
 for file in "${config_files[@]}"; do
@@ -48,7 +52,7 @@ for file in "${config_files[@]}"; do
 done
 
 # Alias definitions
-# We store our aliases in topic seperated $DOTFILES/**/aliases.shell files.
+# We store our aliases in topic seperated $DOTFILES_ROOT/**/aliases.shell files.
 #
 # Additionally let's also load everything in ~/.bash_aliases.
 if [ -f ~/.bash_aliases ]; then

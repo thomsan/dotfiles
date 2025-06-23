@@ -1,0 +1,10 @@
+#
+# Determine the network interfaces of the system
+#
+# Output format: "wlan0 192.168.0.2/24"
+#
+get_interfaces() {
+
+    ip -o -f inet addr show scope global \
+    | awk '{print $2, $4}'
+}
