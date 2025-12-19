@@ -1,1 +1,2 @@
 alias ips="ip address"
+alias artnet-frame-scanning="wireshark -i any -f 'udp port 6454'"
