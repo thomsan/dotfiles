@@ -10,7 +10,7 @@
         program = GPG_PROGRAM
 
 [commit]
-        gpgSign = false
+        gpgSign = true
 
 [tag]
-        gpgSign = false
+        gpgSign = true

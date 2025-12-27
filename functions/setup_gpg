@@ -1,5 +1,12 @@
 setup_gpg () {
     info 'setting up gpg'
+    
+    # Check if gitconfig.local.symlink exists
+    if ! [ -f topics/git/gitconfig.local.symlink ]; then
+        fail 'gitconfig.local.symlink not found. Please run setup_gitconfig first.'
+        return 1
+    fi
+    
     # check if GPG_SIGNINGKEY was disabled before
     if grep -q "#GPG_SIGNINGKEY" topics/git/gitconfig.local.symlink
     then
@@ -32,17 +39,27 @@ setup_gpg () {
         user ' - GPG key ID:'
         
         read -e gpg_signingkey_id
+        
+        # Validate that a key ID was entered
+        if [ -z "$gpg_signingkey_id" ]; then
+            fail 'No GPG key ID provided. Skipping GPG setup.'
+            sed -i "s/GPG_SIGNINGKEY/#GPG_SIGNINGKEY/g" topics/git/gitconfig.local.symlink
+            return
+        fi
+        
         echo ''
+        info ' - Exporting your GPG public key:'
         gpg --armor --export $gpg_signingkey_id
         echo ''
         user ' - Please copy the GPG key above and add it on your github account: https://github.com/settings/keys'
         user ' - Press Enter to continue'
         read -e
         sed -i "s/GPG_SIGNINGKEY/$gpg_signingkey_id/g" topics/git/gitconfig.local.symlink
-        sed -i "s/gpgSign = false/gpgSign = true/g" topics/git/gitconfig.local.symlink
+        success 'GPG signing enabled'
     else
         sed -i "s/GPG_SIGNINGKEY/#GPG_SIGNINGKEY/g" topics/git/gitconfig.local.symlink
         sed -i "s/gpgSign = true/gpgSign = false/g" topics/git/gitconfig.local.symlink
+        success 'GPG signing disabled'
     fi
     success 'gpg setup finished'
 }

@@ -6,15 +6,21 @@ setup_gitconfig () {
         echo $platform
 
         git_credential='cache'
+        gpg_program=''
         if [ "$platform" == "darwin" ]
         then
             git_credential='osxkeychain'
+            gpg_program='gpg'
         elif [ "$platform" == "linux" ]
         then
             info 'Installing libsecret for managing git credentials'
             sudo apt install libsecret-1-0 libsecret-1-dev
             sudo make --directory=/usr/share/doc/git/contrib/credential/libsecret
             git_credential='/usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret'
+            gpg_program='gpg'
+        elif [ "$platform" == "windows" ]
+        then
+            git_credential='cache'
             gpg_program='gpg'
         fi
 
