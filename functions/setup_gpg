@@ -21,8 +21,15 @@ setup_gpg () {
             info ' - Generating a new GPG key'
             gpg --gen-key
         fi
+        echo ''
+        info ' - Listing your GPG keys:'
         gpg --list-secret-keys --keyid-format LONG
-        user ' - Which of the above is your GPG key id:'
+        echo ''
+        user ' - Enter your GPG key ID from above'
+        user '   Look for the line starting with "sec" and copy the ID after the "/"'
+        user '   Example: If you see "sec   ed25519/BE73E0AD7747E405", enter: BE73E0AD7747E405'
+        echo ''
+        user ' - GPG key ID:'
         
         read -e gpg_signingkey_id
         echo ''

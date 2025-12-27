@@ -6,6 +6,9 @@ DOTFILES_ROOT=$(pwd -P)
 
 set -e
 
+# Enable native Windows symlinks in Git Bash/MSYS
+export MSYS=winsymlinks:nativestrict
+
 # include all functions
 for file in $DOTFILES_ROOT/functions/*; do
   source $file

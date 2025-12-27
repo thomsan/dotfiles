@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+# SSH Agent auto-start for Git Bash on Windows
+# This script ensures ssh-agent runs persistently and loads keys automatically
+
+# Path where ssh-agent info is stored
+SSH_ENV="$HOME/.ssh/agent-env"
+
+# Function to start ssh-agent
+start_agent() {
+    echo "Starting ssh-agent..."
+    # Start the ssh-agent and save the environment variables
+    ssh-agent -s | sed 's/^echo/#echo/' > "${SSH_ENV}"
+    chmod 600 "${SSH_ENV}"
+    . "${SSH_ENV}" > /dev/null
+}
+
+# Function to add SSH keys
+add_keys() {
+    # Find all private keys (excluding .pub files and known_hosts)
+    for key in ~/.ssh/id_rsa ~/.ssh/id_dsa ~/.ssh/id_ecdsa ~/.ssh/id_ed25519; do
+        if [ -f "$key" ]; then
+            # Check if key is already added
+            ssh-add -l | grep -q "$(ssh-keygen -lf "$key" 2>/dev/null | awk '{print $2}')" 2>/dev/null
+            if [ $? -ne 0 ]; then
+                # Key not added yet, add it
+                ssh-add "$key" 2>/dev/null
+            fi
+        fi
+    done
+}
+
+# Check if ssh-agent info file exists
+if [ -f "${SSH_ENV}" ]; then
+    . "${SSH_ENV}" > /dev/null
+    # Check if the agent is actually running
+    ps -p ${SSH_AGENT_PID} > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        # Agent not running, start a new one
+        start_agent
+        add_keys
+    fi
+else
+    # No agent info file, start new agent
+    start_agent
+    add_keys
+fi
+
+export SSH_AUTH_SOCK
+export SSH_AGENT_PID

@@ -1,2 +1,25 @@
 #!/usr/bin/env bash
 
+# Windows-specific bootstrap
+
+info 'Setting up Windows SSH Agent service'
+
+# Check if OpenSSH Authentication Agent service exists
+if sc query ssh-agent > /dev/null 2>&1; then
+    # Enable and start the ssh-agent service
+    info 'Configuring OpenSSH Authentication Agent to start automatically'
+
+    # Set service to start automatically
+    powershell.exe -Command "Set-Service -Name ssh-agent -StartupType Automatic" 2>/dev/null
+
+    # Start the service if not running
+    powershell.exe -Command "Start-Service ssh-agent" 2>/dev/null
+
+    if [ $? -eq 0 ]; then
+        success 'SSH Agent service configured successfully'
+    else
+        fail 'Failed to configure SSH Agent service. You may need to run with administrator privileges.'
+    fi
+else
+    user 'OpenSSH Authentication Agent service not found. Please install OpenSSH Client from Windows Settings.'
+fi

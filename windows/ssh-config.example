@@ -1,0 +1,37 @@
+# SSH Config Example
+#
+# This file can be symlinked to ~/.ssh/config
+# It helps manage multiple SSH keys and connections
+#
+# To use:
+#   cp ~/.dotfiles/windows/ssh-config.example ~/.ssh/config
+#   chmod 600 ~/.ssh/config
+
+# Add all keys to agent automatically
+AddKeysToAgent yes
+
+# Keep connections alive
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+
+# GitHub
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519
+    # Optional: use specific key for GitHub
+    # IdentityFile ~/.ssh/id_github
+
+# GitLab
+Host gitlab.com
+    HostName gitlab.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519
+
+# Example: Custom host with specific key
+# Host myserver
+#     HostName example.com
+#     User yourusername
+#     IdentityFile ~/.ssh/id_myserver
+#     Port 22
