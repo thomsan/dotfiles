@@ -1,8 +1,39 @@
 #!/usr/bin/env bash
 
 info 'installing user pip packages'
-sudo apt install python3-venv
-python -m pip install --user --break-system-packages $(grep -v -e '^\s*$' -e '^\s*#' topics/pip/pip-packages)
-success 'user pip packages installed'
 
- 
+platform=$(get_platform)
+
+# python3-venv is only needed on Debian/Ubuntu
+if [ "$platform" == "linux" ] && command -v apt &>/dev/null; then
+  sudo apt install -y python3-venv || warn 'could not install python3-venv via apt (sudo may not be available)'
+fi
+
+# Find python executable
+if command -v python3 &>/dev/null; then
+  PYTHON_CMD="python3"
+elif command -v python &>/dev/null; then
+  PYTHON_CMD="python"
+else
+  warn 'python not found in PATH, skipping pip packages'
+  return 0
+fi
+
+PIP_PACKAGES_FILE="$DOTFILES_ROOT/topics/pip/pip-packages"
+if [ ! -f "$PIP_PACKAGES_FILE" ]; then
+  warn "pip-packages file not found at $PIP_PACKAGES_FILE"
+  return 0
+fi
+
+# --break-system-packages is needed on newer Debian/Ubuntu (PEP 668)
+PIP_FLAGS="--user"
+if [ "$platform" == "linux" ]; then
+  PIP_FLAGS="$PIP_FLAGS --break-system-packages"
+fi
+
+$PYTHON_CMD -m pip install $PIP_FLAGS $(grep -v -e '^\s*$' -e '^\s*#' "$PIP_PACKAGES_FILE") || {
+  warn 'some pip packages failed to install'
+  return 0
+}
+
+success 'user pip packages installed'

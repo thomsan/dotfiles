@@ -6,6 +6,13 @@ DOTFILES_ROOT=$(pwd -P)
 
 set -e
 
+on_error() {
+  local exit_code=$?
+  printf "\r\e[2K[\e[01;31mFAIL\e[0m] bootstrap failed at line %d (exit code: %d)\n" "$1" "$exit_code" >&2
+  exit "$exit_code"
+}
+trap 'on_error $LINENO' ERR
+
 # Enable native Windows symlinks in Git Bash/MSYS
 export MSYS=winsymlinks:nativestrict
 
@@ -29,26 +36,50 @@ install_dotfiles () {
 
 run_topic_bootstrap_files () {
   info 'running topic specific bootstrap files'
+  local failed=0
 
-  for src in $(find -H "$DOTFILES_ROOT/topics/" -maxdepth 2 -name '*.bootstrap' -not -path '*.git*')  
+  for src in $(find -H "$DOTFILES_ROOT/topics/" -maxdepth 2 -name '*.bootstrap' -not -path '*.git*')
   do
     info "running $src"
-    source "$src"
+    if ! (source "$src"); then
+      warn "bootstrap file failed: $src"
+      failed=$((failed + 1))
+    fi
   done
-  success 'topic bootstrap finished'
+
+  if [ $failed -gt 0 ]; then
+    warn "$failed topic bootstrap file(s) had errors"
+  else
+    success 'topic bootstrap finished'
+  fi
 }
 
 run_platform_bootstrap_files () {
-  platform=`get_platform`
+  platform=$(get_platform)
   info 'running platform specific bootstrap files'
-  info $platform
+  info "detected platform: $platform"
 
-  for src in $(find -H "$DOTFILES_ROOT/$platform" -maxdepth 2 -name '*.bootstrap' -not -path '*.git*')  
+  if [ ! -d "$DOTFILES_ROOT/$platform" ]; then
+    warn "no platform directory found for '$platform', skipping"
+    return 0
+  fi
+
+  local failed=0
+
+  for src in $(find -H "$DOTFILES_ROOT/$platform" -maxdepth 2 -name '*.bootstrap' -not -path '*.git*')
   do
     info "running $src"
-    source "$src"
+    if ! (source "$src"); then
+      warn "bootstrap file failed: $src"
+      failed=$((failed + 1))
+    fi
   done
-  success 'platform bootstrap files finished'
+
+  if [ $failed -gt 0 ]; then
+    warn "$failed platform bootstrap file(s) had errors"
+  else
+    success 'platform bootstrap files finished'
+  fi
 }
 
 setup_gitconfig
@@ -62,4 +93,3 @@ echo ''
 run_platform_bootstrap_files
 echo ''
 success 'bootstrap complete'
-
