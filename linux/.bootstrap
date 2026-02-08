@@ -18,6 +18,11 @@ info 'installing apt packages'
 sudo apt install -y $(grep -v -e '^\s*$' -e '^\s*#' linux/apt-packages)
 success 'apt packages installed'
 
+info 'installing libsecret for git credential management'
+sudo apt install -y libsecret-1-0 libsecret-1-dev
+sudo make --directory=/usr/share/doc/git/contrib/credential/libsecret
+success 'libsecret installed'
+
 info 'installing snap packages'
 while IFS= read -r package; do
     # Skip empty lines and lines starting with '#'

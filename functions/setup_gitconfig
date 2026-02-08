@@ -8,33 +8,32 @@ setup_gitconfig () {
     info 'setup gitconfig'
     if ! [ -f topics/git/gitconfig.local.symlink ]
     then
-        platform=`get_platform`
-        echo $platform
+        local platform=$(get_platform)
 
-        git_credential='cache'
-        gpg_program=''
-        if [ "$platform" == "darwin" ]
-        then
-            git_credential='osxkeychain'
-            gpg_program='gpg'
-        elif [ "$platform" == "linux" ]
-        then
-            info 'Installing libsecret for managing git credentials'
-            sudo apt install libsecret-1-0 libsecret-1-dev
-            sudo make --directory=/usr/share/doc/git/contrib/credential/libsecret
-            git_credential='/usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret'
-            gpg_program='gpg'
-        elif [ "$platform" == "windows" ]
-        then
-            git_credential='manager'
-            gpg_program='gpg'
-        fi
+        # Platform-specific git credential helper and gpg program
+        # Installation of dependencies (e.g. libsecret) is handled in {platform}/.bootstrap
+        local git_credential=''
+        local gpg_program='gpg'
+        case "$platform" in
+            darwin)
+                git_credential='osxkeychain'
+                ;;
+            linux)
+                git_credential='/usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret'
+                ;;
+            windows|cygwin)
+                git_credential='manager'
+                ;;
+            *)
+                warn "unknown platform '$platform', no credential helper configured"
+                ;;
+        esac
 
         user ' - What is your github author name?'
-        read -e git_authorname
+        read -e git_authorname < /dev/tty
         user ' - What is your github author email?'
-        read -e git_authoremail
-        
+        read -e git_authoremail < /dev/tty
+
 
         # escape git_credentials sed delimiter /
         git_credential=$(echo $git_credential | sed -e 's/[\/&]/\\&/g')
@@ -48,11 +47,11 @@ setup_gitconfig () {
         if [ "$platform" == "windows" ]; then
             git config --file topics/git/gitconfig.local.symlink credential.helperselector.selected manager
         fi
-        
+
         success 'gitconfig setup finished'
     else
         success 'gitconfig already set up'
     fi
-    
-    
+
+
 }
