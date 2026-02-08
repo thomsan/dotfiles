@@ -1,25 +1,114 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-# Windows-specific bootstrap
+# Windows-specific bootstrap for SSH (Option A):
+# - Ensures Windows OpenSSH client is installed
+# - Enables + starts Windows OpenSSH Authentication Agent service (ssh-agent) (requires admin)
+# - Configures Git to use Windows ssh.exe (so it talks to Windows ssh-agent)
 
-info 'Setting up Windows SSH Agent service'
+info 'Setting up Windows OpenSSH ssh-agent service and Git SSH configuration'
 
-# Check if OpenSSH Authentication Agent service exists
-if sc query ssh-agent > /dev/null 2>&1; then
-    # Enable and start the ssh-agent service
-    info 'Configuring OpenSSH Authentication Agent to start automatically'
+is_windows_gitbash() {
+  case "$(uname -s 2>/dev/null || true)" in
+    MINGW*|MSYS*|CYGWIN*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
-    # Set service to start automatically
-    powershell.exe -Command "Set-Service -Name ssh-agent -StartupType Automatic" 2>/dev/null
+require_cmd() {
+  local cmd="$1"
+  command -v "$cmd" >/dev/null 2>&1
+}
 
-    # Start the service if not running
-    powershell.exe -Command "Start-Service ssh-agent" 2>/dev/null
+ps() {
+  # Always use Windows PowerShell (not pwsh) for maximum availability
+  powershell.exe -NoProfile -Command "$1"
+}
 
-    if [ $? -eq 0 ]; then
-        success 'SSH Agent service configured successfully'
-    else
-        fail 'Failed to configure SSH Agent service. You may need to run with administrator privileges.'
-    fi
-else
-    user 'OpenSSH Authentication Agent service not found. Please install OpenSSH Client from Windows Settings.'
+if ! is_windows_gitbash; then
+  user 'Not running in Windows Git Bash/MSYS. Skipping Windows SSH bootstrap.'
+  exit 0
 fi
+
+# 0) Ensure git exists (we need it for core.sshCommand)
+if ! require_cmd git; then
+  fail 'git not found in PATH. Install Git for Windows first.'
+fi
+
+# 1) Ensure Windows OpenSSH client exists (ssh.exe path must be valid)
+WIN_SSH_EXE='C:/Windows/System32/OpenSSH/ssh.exe'
+WIN_SSH_ADD_EXE='C:/Windows/System32/OpenSSH/ssh-add.exe'
+
+if [ ! -x "/c/Windows/System32/OpenSSH/ssh.exe" ]; then
+  user 'Install "OpenSSH Client" in Windows: Settings → Apps → Optional features → Add a feature → OpenSSH Client.'
+  fail "Windows OpenSSH client not found at ${WIN_SSH_EXE}"
+fi
+
+if [ ! -x "/c/Windows/System32/OpenSSH/ssh-add.exe" ]; then
+  user 'Install "OpenSSH Client" in Windows: Settings → Apps → Optional features → Add a feature → OpenSSH Client.'
+  fail "Windows ssh-add not found at ${WIN_SSH_ADD_EXE}"
+fi
+
+success "Found Windows OpenSSH client: ${WIN_SSH_EXE}"
+
+# 2) Ensure ssh-agent service exists
+if ! sc.exe query ssh-agent >/dev/null 2>&1; then
+  user 'Install "OpenSSH Client" in Windows: Settings → Apps → Optional features → Add a feature → OpenSSH Client.'
+  fail 'OpenSSH Authentication Agent service (ssh-agent) not found.'
+fi
+success 'OpenSSH Authentication Agent service found (ssh-agent).'
+
+# 3) Enable and start the service
+info 'Configuring ssh-agent service to start automatically (requires Administrator)...'
+
+# Set startup type Automatic (may fail without admin)
+set_startup_ok=0
+if ps "Set-Service -Name ssh-agent -StartupType Automatic" >/dev/null 2>&1; then
+  set_startup_ok=1
+fi
+
+# Start service (may fail without admin depending on policy)
+start_ok=0
+if ps "Start-Service -Name ssh-agent" >/dev/null 2>&1; then
+  start_ok=1
+fi
+
+# Verify status
+status="$(ps "(Get-Service -Name ssh-agent).Status" 2>/dev/null | tr -d '\r' || true)"
+
+if [[ "${status}" == "Running" ]]; then
+  success 'ssh-agent service is running.'
+else
+  if [[ $set_startup_ok -eq 0 || $start_ok -eq 0 ]]; then
+    user 'Most likely you need Administrator privileges.'
+    user 'Manual fix (run in an elevated PowerShell):'
+    user '  Set-Service -Name ssh-agent -StartupType Automatic'
+    user '  Start-Service -Name ssh-agent'
+  fi
+  fail "ssh-agent service is NOT running (Status=${status:-unknown})."
+fi
+
+# 4) Configure Git to use Windows ssh.exe (in local config, not the tracked global)
+info 'Configuring Git to use Windows OpenSSH (ssh.exe) via core.sshCommand in .gitconfig.local'
+git config --file "$HOME/.gitconfig.local" core.sshCommand "$WIN_SSH_EXE"
+success "Set core.sshCommand to ${WIN_SSH_EXE} in ~/.gitconfig.local"
+
+# 5) Smoke test: can Windows ssh-add talk to the agent?
+info 'Testing connection to Windows ssh-agent via ssh-add -l'
+if "/c/Windows/System32/OpenSSH/ssh-add.exe" -l >/dev/null 2>&1; then
+  success 'ssh-add can connect to the Windows ssh-agent.'
+else
+  # This can still happen if agent is running but the call fails due to environment issues.
+  # Provide actionable diagnostics.
+  user 'Diagnostics: restart your shell (to load the ssh-add alias from ssh.shell), then run:'
+  user '  ssh-add -l'
+  fail 'ssh-add could not connect to the Windows ssh-agent.'
+fi
+
+# 6) Final guidance
+user 'Manual step (per Windows login session): unlock your key once:'
+user '  ssh-add'
+user 'Verify loaded keys:'
+user '  ssh-add -l'
+
+success 'Windows SSH bootstrap complete.'

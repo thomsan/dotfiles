@@ -1,123 +1,108 @@
-# Windows SSH Auto-loading Setup
+# Windows Git Bash SSH Setup
 
-This directory contains Windows-specific configuration for auto-loading SSH keys in Git Bash.
+Uses **Windows OpenSSH** and the **Windows `ssh-agent` service** for Git SSH authentication in Git Bash.
 
-## Integration with Dotfiles System
+## What you get
 
-This SSH setup integrates seamlessly with your existing dotfiles architecture:
+- `ssh-agent` runs as a Windows service (persists across reboots).
+- Git uses `C:\Windows\System32\OpenSSH\ssh.exe` (via `core.sshCommand`).
+- `ssh` and `ssh-add` shell functions wrap the Windows executables so they work naturally in Git Bash.
+- You unlock your private key **once per Windows login session** — pushes won't re-prompt.
+
+## How it works
+
+### Integration with the dotfiles system
 
 ```
 System Start
     │
-    ├─> Windows SSH Agent Service (auto-starts)
-    │   └─> Configured by: windows/.bootstrap
-    │
+    └─> Windows SSH Agent Service (auto-starts)
+        └─> Configured once by: windows/.bootstrap
+
 User Opens Git Bash
     │
-    ├─> ~/.bashrc loads (symlinked from topics/bash/bashrc.symlink)
-    │   │
-    │   ├─> Sets DOTFILES=$HOME/.dotfiles
-    │   │
-    │   ├─> Sources all $DOTFILES/**/*.shell files
-    │   │   ├─> topics/*/*.shell (env, path, aliases)
-    │   │   ├─> linux/*.shell (if on Linux)
-    │   │   ├─> darwin/*.shell (if on macOS)
-    │   │   └─> windows/ssh.shell ← SSH agent starts here (on Windows)
-    │   │
-    │   └─> SSH keys loaded automatically
-    │
-SSH Connection
-    └─> Uses loaded keys, no password prompt needed
+    └─> ~/.bashrc loads (symlinked from topics/bash/bashrc.symlink)
+        │
+        ├─> Sources all **/*.shell files via load_ordered_config
+        │   └─> windows/ssh.shell
+        │       ├─> Unsets MSYS ssh-agent env vars
+        │       ├─> Sets git core.sshCommand to Windows ssh.exe
+        │       └─> Defines ssh-add() and ssh() wrapper functions
+        │
+        └─> SSH keys available via Windows ssh-agent
 ```
 
-### Files in the System
+### Files
 
-- **[bootstrap](../bootstrap)** - Main bootstrap script
-  - Runs `run_platform_bootstrap_files()` which executes `windows/.bootstrap`
+| File | When it runs | What it does |
+|------|-------------|-------------|
+| [windows/.bootstrap](.bootstrap) | Once during `./bootstrap` | Verifies OpenSSH is installed, enables & starts the `ssh-agent` service, sets `core.sshCommand` |
+| [windows/ssh.shell](ssh.shell) | Every bash session (sourced by `~/.bashrc`) | Unsets MSYS agent vars, wraps `ssh` and `ssh-add` to use Windows OpenSSH executables |
 
-- **[topics/bash/bashrc.symlink](../topics/bash/bashrc.symlink)** - Main bash configuration
-  - Symlinked to `~/.bashrc` during bootstrap
-  - Sources all `**/*.shell` files including `windows/ssh.shell`
+### Bootstrap steps (`.bootstrap`)
 
-- **[windows/.bootstrap](./bootstrap)** - Windows-specific bootstrap (this runs once during setup)
-  - Configures Windows OpenSSH Authentication Agent service
+1. Checks that Windows OpenSSH client (`ssh.exe`, `ssh-add.exe`) is installed
+2. Verifies the `ssh-agent` Windows service exists
+3. Attempts to set the service to **Automatic** startup and start it (requires Administrator)
+4. Verifies the service is running
+5. Sets `git config --global core.sshCommand` to Windows `ssh.exe`
+6. Smoke-tests that `ssh-add` can talk to the agent
 
-- **[windows/ssh.shell](./ssh.shell)** - SSH agent auto-start (runs every bash session)
-  - Automatically sourced by `~/.bashrc`
-  - Starts ssh-agent and loads keys
+### Shell session setup (`ssh.shell`)
 
-## How it works
+1. Unsets `SSH_AUTH_SOCK` and `SSH_AGENT_PID` (prevents Git Bash from using the MSYS ssh-agent)
+2. Removes legacy `~/.ssh/agent-env` file if present
+3. Sets `git core.sshCommand` to Windows `ssh.exe`
+4. Defines `ssh-add()` → wraps `/c/Windows/System32/OpenSSH/ssh-add.exe`
+5. Defines `ssh()` → wraps `/c/Windows/System32/OpenSSH/ssh.exe`
 
-### 1. SSH Agent Service (`.bootstrap`)
-- Configures Windows OpenSSH Authentication Agent to start automatically
-- Runs during dotfiles bootstrap process
-- Requires OpenSSH Client to be installed on Windows 11
+## Setup
 
-### 2. SSH Agent Auto-start (`ssh.shell`)
-- Automatically starts ssh-agent in Git Bash if not already running
-- Persists agent info in `~/.ssh/agent-env` to avoid creating multiple agents
-- Auto-loads all SSH keys found in `~/.ssh/` directory
-- Runs every time a new bash session starts
+### Prerequisites
 
-## Setup Instructions
+- **Windows 11** with **OpenSSH Client** installed
+  - Settings → Apps → Optional features → Add a feature → **OpenSSH Client**
+- **Git for Windows** (Git Bash)
 
-### First-time Setup
+### First-time setup
 
-1. **Ensure OpenSSH is installed** (usually pre-installed on Windows 11):
-   - Open Settings → Apps → Optional Features
-   - Search for "OpenSSH Client"
-   - If not installed, click "Add a feature" and install it
+```bash
+cd ~/projects/dotfiles
+./bootstrap
+```
 
-2. **Run bootstrap** to configure the SSH agent service:
-   ```bash
-   cd ~/projects/dotfiles
-   ./bootstrap
-   ```
-   Note: You may need to run this in an elevated terminal for service configuration.
+If the bootstrap reports the `ssh-agent` service couldn't be started (missing privileges), run in **PowerShell as Administrator**:
 
-3. **Reload your shell** or source your bashrc:
-   ```bash
-   source ~/.bashrc
-   ```
+```powershell
+Set-Service -Name ssh-agent -StartupType Automatic
+Start-Service -Name ssh-agent
+```
 
-### First Use
+Then re-run `./bootstrap`.
 
-The first time you use SSH after a system restart:
-- The ssh-agent will start automatically
-- You'll be prompted for your SSH key passphrase(s) once
-- The keys remain loaded in the agent until system restart
+### First use (after each reboot)
 
-### Optional: Store Passphrase in Windows Credential Manager
+After the service is running, unlock your key once per Windows login session:
 
-For completely automated key loading without any password prompt:
+```bash
+ssh-add
+```
 
-1. **Add your SSH key to the Windows SSH Agent service:**
-   ```powershell
-   # In PowerShell (Administrator)
-   Start-Service ssh-agent
-   ssh-add ~\.ssh\id_ed25519
-   ```
+Verify loaded keys:
 
-2. The Windows SSH Agent service stores passphrases securely and loads them automatically on system start.
+```bash
+ssh-add -l
+```
+
+The `ssh-add` and `ssh` commands work directly in Git Bash thanks to the wrapper functions in `ssh.shell`.
 
 ## Troubleshooting
 
-### Agent not starting
-- Check if OpenSSH is installed: `ssh -V`
-- Check service status: `sc query ssh-agent`
-- Restart service: `powershell.exe -Command "Restart-Service ssh-agent"`
-
-### Keys not loading automatically
-- Check if keys exist: `ls -la ~/.ssh/`
-- Check agent is running: `ssh-add -l`
-- Manually add key: `ssh-add ~/.ssh/id_ed25519`
-
-### Multiple agents running
-- The `ssh.shell` script prevents this by reusing existing agent info
-- If issues persist, remove: `rm ~/.ssh/agent-env` and restart bash
-
-## Files
-
-- `.bootstrap` - Configures Windows SSH Agent service during dotfiles installation
-- `ssh.shell` - Auto-loaded by bashrc, starts agent and loads keys
-- `README.md` - This file
+| Problem | Check |
+|---------|-------|
+| `ssh-add` not recognized | Restart your shell so `ssh.shell` is sourced |
+| Agent not running | `sc query ssh-agent` — status should be `RUNNING` |
+| OpenSSH not installed | `ssh -V` — should show OpenSSH version |
+| Keys not loading | `ls -la ~/.ssh/` — check key files exist |
+| Permission denied on push | `ssh-add -l` — verify key is loaded, then `ssh -T git@github.com` |
+| Service won't start | Run `Set-Service` / `Start-Service` in elevated PowerShell (see above) |

@@ -1,50 +1,24 @@
 #!/usr/bin/env bash
+# SSH setup for Git Bash on Windows (Option A: Windows ssh-agent service)
+# Safe for login shells.
 
-# SSH Agent auto-start for Git Bash on Windows
-# This script ensures ssh-agent runs persistently and loads keys automatically
+# 1) Ensure Git Bash does NOT use MSYS ssh-agent sockets
+unset SSH_AUTH_SOCK
+unset SSH_AGENT_PID
 
-# Path where ssh-agent info is stored
-SSH_ENV="$HOME/.ssh/agent-env"
+# 2) Remove legacy MSYS agent env file if present
+[ -f "$HOME/.ssh/agent-env" ] && rm -f "$HOME/.ssh/agent-env" 2>/dev/null
 
-# Function to start ssh-agent
-start_agent() {
-    echo "Starting ssh-agent..."
-    # Start the ssh-agent and save the environment variables
-    ssh-agent -s | sed 's/^echo/#echo/' > "${SSH_ENV}"
-    chmod 600 "${SSH_ENV}"
-    . "${SSH_ENV}" > /dev/null
+# 3) Force Git to use Windows OpenSSH ssh.exe (write to local config, not the tracked global)
+git config --file "$HOME/.gitconfig.local" core.sshCommand "C:/Windows/System32/OpenSSH/ssh.exe" >/dev/null 2>&1 || true
+
+# 4) Override ssh-add to call Windows ssh-add via PowerShell
+#    This lets you type `ssh-add` naturally in Git Bash.
+ssh-add() {
+  /c/WINDOWS/System32/OpenSSH/ssh-add.exe "$@"
 }
 
-# Function to add SSH keys
-add_keys() {
-    # Find all private keys (excluding .pub files and known_hosts)
-    for key in ~/.ssh/id_rsa ~/.ssh/id_dsa ~/.ssh/id_ecdsa ~/.ssh/id_ed25519; do
-        if [ -f "$key" ]; then
-            # Check if key is already added
-            ssh-add -l | grep -q "$(ssh-keygen -lf "$key" 2>/dev/null | awk '{print $2}')" 2>/dev/null
-            if [ $? -ne 0 ]; then
-                # Key not added yet, add it
-                ssh-add "$key" 2>/dev/null
-            fi
-        fi
-    done
+# Optional: override ssh to Windows ssh.exe for manual use as well
+ssh() {
+  /c/Windows/System32/OpenSSH/ssh.exe "$@"
 }
-
-# Check if ssh-agent info file exists
-if [ -f "${SSH_ENV}" ]; then
-    . "${SSH_ENV}" > /dev/null
-    # Check if the agent is actually running
-    ps -p ${SSH_AGENT_PID} > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        # Agent not running, start a new one
-        start_agent
-        add_keys
-    fi
-else
-    # No agent info file, start new agent
-    start_agent
-    add_keys
-fi
-
-export SSH_AUTH_SOCK
-export SSH_AGENT_PID
