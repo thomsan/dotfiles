@@ -1,11 +1,12 @@
-# 
-# Determine the platform we're on
-# 
-# Uuse like this:
-# if [[ "$(get_platform)" == 'linux' ]]; then
-#   ...
-# fi
+# Shell function - sourced by bashrc/zshrc
+# Works with: bash, zsh
 #
+# Determine the platform we're on
+# Use like this:
+#   if [[ "$(get_platform)" == 'linux' ]]; then
+#     ...
+#   fi
+
 get_platform() {
   case "$OSTYPE" in
     linux*)  printf 'linux';;

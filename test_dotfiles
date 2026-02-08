@@ -1,0 +1,344 @@
+#!/usr/bin/env bash
+# Test suite for dotfiles repository
+# Validates all paths, functions, and configurations work correctly
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+TESTS_PASSED=0
+TESTS_FAILED=0
+
+# Test result tracking
+pass() {
+  echo -e "${GREEN}✓${NC} $1"
+  ((TESTS_PASSED++))
+}
+
+fail() {
+  echo -e "${RED}✗${NC} $1"
+  ((TESTS_FAILED++))
+}
+
+warn() {
+  echo -e "${YELLOW}⚠${NC} $1"
+}
+
+section() {
+  echo ""
+  echo "====== $1 ======"
+}
+
+# Determine test root (where this script is)
+TEST_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+section "Testing DOTFILES_ROOT Detection"
+
+# Test get_dotfiles_root function
+if [[ -f "$TEST_ROOT/functions/get_dotfiles_root" ]]; then
+  source "$TEST_ROOT/functions/get_dotfiles_root"
+  pass "get_dotfiles_root function exists"
+
+  # Test with a file that would be in topics/bash/
+  # Use the actual bashrc.symlink to test
+  if [[ -f "$TEST_ROOT/topics/bash/bashrc.symlink" ]]; then
+    DETECTED_ROOT="$(get_dotfiles_root "$TEST_ROOT/topics/bash/bashrc.symlink")"
+    if [[ "$DETECTED_ROOT" == "$TEST_ROOT" ]]; then
+      pass "get_dotfiles_root correctly detects repo root: $DETECTED_ROOT"
+    else
+      fail "get_dotfiles_root returned wrong path: $DETECTED_ROOT (expected: $TEST_ROOT)"
+    fi
+  else
+    warn "Cannot test get_dotfiles_root: bashrc.symlink not found"
+  fi
+else
+  fail "get_dotfiles_root function not found"
+fi
+
+section "Testing Required Directories"
+
+required_dirs=(
+  "functions"
+  "topics"
+  "topics/bash"
+  "topics/git"
+  "topics/shell"
+  "topics/pip"
+  "linux"
+  "windows"
+  "darwin"
+)
+
+for dir in "${required_dirs[@]}"; do
+  if [[ -d "$TEST_ROOT/$dir" ]]; then
+    pass "Directory exists: $dir"
+  else
+    fail "Directory missing: $dir"
+  fi
+done
+
+section "Testing Required Files"
+
+required_files=(
+  "bootstrap"
+  "topics/bash/bashrc.symlink"
+  "topics/git/gitconfig.symlink"
+  "topics/git/gitignore.symlink"
+  "functions/get_platform"
+  "functions/logging"
+  "functions/link_file"
+)
+
+for file in "${required_files[@]}"; do
+  if [[ -f "$TEST_ROOT/$file" ]]; then
+    pass "File exists: $file"
+  else
+    fail "File missing: $file"
+  fi
+done
+
+section "Testing Core Functions"
+
+# Source all functions
+for func_file in "$TEST_ROOT"/functions/*; do
+  if [[ -f "$func_file" ]]; then
+    source "$func_file" 2>/dev/null
+  fi
+done
+
+# Test get_platform
+if type -t get_platform &>/dev/null; then
+  platform=$(get_platform)
+  if [[ -n "$platform" ]]; then
+    pass "get_platform works: detected '$platform'"
+  else
+    fail "get_platform returned empty value"
+  fi
+else
+  fail "get_platform function not available"
+fi
+
+# Test source_if_exists
+if type -t source_if_exists &>/dev/null; then
+  pass "source_if_exists function exists"
+  # Test with non-existent file (should not error)
+  if source_if_exists "/nonexistent/file.sh" 2>/dev/null; then
+    pass "source_if_exists handles missing files gracefully"
+  fi
+else
+  fail "source_if_exists function not available"
+fi
+
+# Test load_shell_files
+if type -t load_shell_files &>/dev/null; then
+  pass "load_shell_files function exists"
+else
+  fail "load_shell_files function not available"
+fi
+
+# Test load_ordered_config
+if type -t load_ordered_config &>/dev/null; then
+  pass "load_ordered_config function exists"
+else
+  fail "load_ordered_config function not available"
+fi
+
+# Test logging functions
+if type -t info &>/dev/null && type -t success &>/dev/null && type -t fail &>/dev/null; then
+  pass "Logging functions (info, success, fail) exist"
+else
+  fail "Logging functions not all available"
+fi
+
+section "Testing Shell File Patterns"
+
+# Find all .shell files
+shell_files=("$TEST_ROOT"/**/*.shell)
+shell_count=0
+for file in "${shell_files[@]}"; do
+  [[ -f "$file" ]] && ((shell_count++))
+done
+
+if [[ $shell_count -gt 0 ]]; then
+  pass "Found $shell_count .shell files"
+else
+  warn "No .shell files found (this might be normal for minimal setup)"
+fi
+
+# Check for path.shell files
+path_shells=("$TEST_ROOT"/**/path.shell)
+path_count=0
+for file in "${path_shells[@]}"; do
+  [[ -f "$file" ]] && ((path_count++))
+done
+
+if [[ $path_count -gt 0 ]]; then
+  pass "Found $path_count path.shell files"
+else
+  warn "No path.shell files found"
+fi
+
+# Check for aliases.shell files
+alias_shells=("$TEST_ROOT"/**/aliases.shell)
+alias_count=0
+for file in "${alias_shells[@]}"; do
+  [[ -f "$file" ]] && ((alias_count++))
+done
+
+if [[ $alias_count -gt 0 ]]; then
+  pass "Found $alias_count aliases.shell files"
+else
+  warn "No aliases.shell files found"
+fi
+
+section "Testing Symlink Files"
+
+symlink_files=("$TEST_ROOT"/topics/**/*.symlink)
+symlink_count=0
+for file in "${symlink_files[@]}"; do
+  [[ -f "$file" ]] && ((symlink_count++))
+done
+
+if [[ $symlink_count -gt 0 ]]; then
+  pass "Found $symlink_count .symlink files for installation"
+else
+  fail "No .symlink files found - nothing to install"
+fi
+
+section "Testing Bootstrap Script"
+
+if [[ -x "$TEST_ROOT/bootstrap" ]]; then
+  pass "bootstrap script exists and is executable"
+else
+  if [[ -f "$TEST_ROOT/bootstrap" ]]; then
+    warn "bootstrap script exists but is not executable (run: chmod +x bootstrap)"
+  else
+    fail "bootstrap script not found"
+  fi
+fi
+
+# Check bootstrap sources required functions
+if grep -q "setup_gitconfig" "$TEST_ROOT/bootstrap" 2>/dev/null; then
+  pass "bootstrap calls setup_gitconfig"
+else
+  warn "bootstrap doesn't seem to call setup_gitconfig"
+fi
+
+section "Testing Platform-Specific Files"
+
+platform=$(get_platform 2>/dev/null || echo "unknown")
+case "$platform" in
+  linux)
+    if [[ -f "$TEST_ROOT/linux/.bootstrap" ]]; then
+      pass "Linux bootstrap file exists"
+    else
+      warn "Linux bootstrap file not found"
+    fi
+    ;;
+  windows)
+    if [[ -f "$TEST_ROOT/windows/.bootstrap" ]]; then
+      pass "Windows bootstrap file exists"
+    else
+      warn "Windows bootstrap file not found"
+    fi
+    ;;
+  macos|darwin)
+    if [[ -f "$TEST_ROOT/darwin/.bootstrap" ]]; then
+      pass "macOS bootstrap file exists"
+    else
+      warn "macOS bootstrap file not found"
+    fi
+    ;;
+esac
+
+section "Testing Bash RC File"
+
+if [[ -f "$TEST_ROOT/topics/bash/bashrc.symlink" ]]; then
+  # Test bashrc can be sourced without errors
+  if bash -c "source '$TEST_ROOT/topics/bash/bashrc.symlink' 2>&1" | grep -qi "error\|fail"; then
+    warn "bashrc.symlink may have errors when sourced"
+  else
+    pass "bashrc.symlink can be sourced"
+  fi
+
+  # Check it sets DOTFILES_ROOT
+  if grep -q "DOTFILES_ROOT" "$TEST_ROOT/topics/bash/bashrc.symlink"; then
+    pass "bashrc.symlink sets DOTFILES_ROOT"
+  else
+    fail "bashrc.symlink doesn't set DOTFILES_ROOT"
+  fi
+else
+  fail "bashrc.symlink not found"
+fi
+
+section "Testing ZSH RC File"
+
+if [[ -f "$TEST_ROOT/topics/zsh/zshrc.symlink" ]]; then
+  pass "zshrc.symlink exists"
+
+  # Check it sets ZSH variable
+  if grep -q "export ZSH=" "$TEST_ROOT/topics/zsh/zshrc.symlink"; then
+    pass "zshrc.symlink sets ZSH variable"
+  else
+    fail "zshrc.symlink doesn't set ZSH variable"
+  fi
+else
+  warn "zshrc.symlink not found (OK if you don't use zsh)"
+fi
+
+section "Testing Function Headers"
+
+# Check all functions have proper headers
+functions_without_headers=0
+for func_file in "$TEST_ROOT"/functions/*; do
+  if [[ -f "$func_file" ]] && ! grep -q "Shell function" "$func_file"; then
+    warn "Function missing header: $(basename "$func_file")"
+    ((functions_without_headers++))
+  fi
+done
+
+if [[ $functions_without_headers -eq 0 ]]; then
+  pass "All functions have proper headers"
+else
+  warn "$functions_without_headers functions missing proper headers"
+fi
+
+section "Testing for Common Issues"
+
+# Check for hardcoded ~/.dotfiles paths
+if grep -r "\.dotfiles" "$TEST_ROOT/topics" --exclude-dir=.git 2>/dev/null | grep -v "# " | grep -v test_dotfiles; then
+  warn "Found hardcoded ~/.dotfiles references (should use \$DOTFILES_ROOT or \$ZSH)"
+else
+  pass "No hardcoded ~/.dotfiles paths found"
+fi
+
+# Check for shebangs in functions (they shouldn't have them)
+functions_with_shebangs=0
+for func_file in "$TEST_ROOT"/functions/*; do
+  if [[ -f "$func_file" ]] && head -1 "$func_file" | grep -q "^#!/"; then
+    warn "Function has shebang (unnecessary): $(basename "$func_file")"
+    ((functions_with_shebangs++))
+  fi
+done
+
+if [[ $functions_with_shebangs -eq 0 ]]; then
+  pass "No functions have unnecessary shebangs"
+fi
+
+section "Test Summary"
+
+echo ""
+echo "======================================"
+printf "Tests passed: ${GREEN}%d${NC}\n" "$TESTS_PASSED"
+printf "Tests failed: ${RED}%d${NC}\n" "$TESTS_FAILED"
+echo "======================================"
+
+if [[ $TESTS_FAILED -eq 0 ]]; then
+  printf "${GREEN}All tests passed!${NC} ✨\n"
+  exit 0
+else
+  printf "${RED}Some tests failed.${NC} Please review the output above.\n"
+  exit 1
+fi

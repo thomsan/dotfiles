@@ -1,3 +1,8 @@
+# Shell function library - sourced by bashrc/zshrc
+# Works with: bash, zsh
+#
+# Logging utility functions for colored output
+
 light_red="\e[01;31m"
 green="\e[0;32m"
 light_green="\e[01;32m"

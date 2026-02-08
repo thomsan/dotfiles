@@ -1,0 +1,24 @@
+# Shell function - sourced by bashrc/zshrc
+# Works with: bash, zsh
+#
+# Get the dotfiles root directory by resolving the symlink of a config file
+# Usage: get_dotfiles_root <config_file_path>
+# Returns: Absolute path to dotfiles root directory
+
+get_dotfiles_root() {
+  local config_file="$1"
+  local real_path
+
+  if [[ -L "$config_file" ]]; then
+    # It's a symlink, resolve it
+    real_path="$(readlink "$config_file" 2>/dev/null || echo "$config_file")"
+    # If relative path, make it absolute
+    [[ "$real_path" != /* ]] && real_path="$(dirname "$config_file")/$real_path"
+  else
+    # Not a symlink, make it absolute
+    real_path="$(cd "$(dirname "$config_file")" 2>/dev/null && pwd)/$(basename "$config_file")"
+  fi
+
+  # Navigate up two directories to reach dotfiles root (config is in topics/*/file)
+  (cd "$(dirname "$real_path")/../.." 2>/dev/null && pwd)
+}

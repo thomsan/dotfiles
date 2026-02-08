@@ -1,8 +1,9 @@
+# Shell function - sourced by bashrc/zshrc
+# Works with: bash, zsh
 #
 # Determine the network interfaces of the system
-#
 # Output format: "wlan0 192.168.0.2/24"
-#
+
 get_interfaces() {
 
     ip -o -f inet addr show scope global \

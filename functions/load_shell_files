@@ -1,0 +1,16 @@
+# Shell function - sourced by bashrc/zshrc
+# Works with: bash, zsh
+#
+# Load all shell files matching a pattern
+# Usage: load_shell_files <root_dir> <pattern>
+# Example: load_shell_files "$DOTFILES_ROOT" "*.bash"
+
+load_shell_files() {
+  local root_dir="$1"
+  local pattern="$2"
+  local files=("$root_dir"/**/$pattern)
+  
+  for file in "${files[@]}"; do
+    [[ -f "$file" ]] && source "$file"
+  done
+}

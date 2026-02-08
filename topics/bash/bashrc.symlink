@@ -29,56 +29,25 @@ platform=`get_platform`
 # Stash your environment variables in ~/.localrc. This means they'll stay out
 # of your main dotfiles repository (which may be public, like this one), but
 # you'll have access to them in your scripts.
-if [[ -a ~/.localrc ]]
-then
-  source ~/.localrc
-fi
+source_if_exists ~/.localrc
 
-# load all our bash filess
-bash_files=($DOTFILES_ROOT/**/*.bash)
-for file in "${bash_files[@]}"; do
-  source $file
-done
-unset bash_files
+# load all our bash files
+load_shell_files "$DOTFILES_ROOT" "*.bash"
 
-# all of our shell files
-config_files=($DOTFILES_ROOT/**/*.shell)
+# load bash aliases if present
+source_if_exists ~/.bash_aliases
 
-# load the path files
-for file in "${config_files[@]}"; do
-  if [[ $file == *"/path.shell" ]]; then
-    source $file
-  fi
-done
+# load path files first
+load_ordered_config "$DOTFILES_ROOT" "path"
 
-# Alias definitions
-# We store our aliases in topic seperated $DOTFILES_ROOT/**/aliases.shell files.
-#
-# Additionally let's also load everything in ~/.bash_aliases.
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
-
-# load everything but the path and completion files
-for file in "${config_files[@]}"; do
-  if [[ $file != *"/path.shell" ]] && [[ $file != *"/completion.shell" ]]; then
-    source $file
-  fi
-done
+# load main shell config files (aliases, env vars, etc.)
+load_ordered_config "$DOTFILES_ROOT" "main"
 
 # initialize autocomplete here, otherwise functions won't be loaded
-if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
-    . /etc/bash_completion
-fi
+source_if_exists /etc/bash_completion
 
-# load every completion after autocomplete loads
-for file in "${config_files[@]}"; do
-  if [[ $file == *"/completion.shell" ]]; then
-    source $file
-  fi
-done
-
-unset config_files
+# load completion files after autocomplete
+load_ordered_config "$DOTFILES_ROOT" "completion"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm

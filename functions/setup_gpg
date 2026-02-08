@@ -1,3 +1,9 @@
+# Shell function - sourced by bootstrap
+# Works with: bash, zsh
+#
+# Interactive GPG setup for commit signing
+# Requires setup_gitconfig to be run first
+
 setup_gpg () {
     info 'setting up gpg'
     

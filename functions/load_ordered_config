@@ -1,0 +1,45 @@
+# Shell function - sourced by bashrc/zshrc
+# Works with: bash, zsh
+#
+# Load shell config files in proper order:
+#   1. path.shell files (set up PATH)
+#   2. regular .shell files (aliases, env vars, etc.)
+#   3. completion.shell files (after autocomplete is initialized)
+# 
+# Usage: load_ordered_config <root_dir> [phase]
+# Phases: "path", "main", "completion"
+
+load_ordered_config() {
+  local root_dir="$1"
+  local phase="${2:-all}"
+  local config_files=("$root_dir"/**/*.shell)
+  
+  case "$phase" in
+    path)
+      # Load only path files
+      for file in "${config_files[@]}"; do
+        [[ "$file" == */path.shell ]] && [[ -f "$file" ]] && source "$file"
+      done
+      ;;
+    main)
+      # Load everything except path and completion files
+      for file in "${config_files[@]}"; do
+        [[ "$file" != */path.shell ]] && \
+        [[ "$file" != */completion.shell ]] && \
+        [[ -f "$file" ]] && source "$file"
+      done
+      ;;
+    completion)
+      # Load only completion files
+      for file in "${config_files[@]}"; do
+        [[ "$file" == */completion.shell ]] && [[ -f "$file" ]] && source "$file"
+      done
+      ;;
+    all)
+      # Load in order: path -> main -> completion
+      load_ordered_config "$root_dir" "path"
+      load_ordered_config "$root_dir" "main"
+      load_ordered_config "$root_dir" "completion"
+      ;;
+  esac
+}

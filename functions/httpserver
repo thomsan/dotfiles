@@ -1,3 +1,5 @@
+# Shell function - sourced by bashrc/zshrc
+# Works with: bash, zsh
 #
 # Start an HTTP server from a directory, optionally specifying the port
 #

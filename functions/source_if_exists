@@ -1,0 +1,9 @@
+# Shell function - sourced by bashrc/zshrc
+# Works with: bash, zsh
+#
+# Source a file only if it exists
+# Usage: source_if_exists <file_path>
+
+source_if_exists() {
+  [[ -f "$1" ]] && source "$1"
+}

@@ -1,56 +1,38 @@
 # Fig pre block. Keep at the top of this file.
 [[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && . "$HOME/.fig/shell/zshrc.pre.zsh"
+
 # shortcut to this dotfiles path is $ZSH
-export ZSH=$HOME/.dotfiles
+source "${(%):-%x:A:h:h:h}/functions/get_dotfiles_root"
+export ZSH="$(get_dotfiles_root "${(%):-%x}")"
 
 # your project folder that we can `c [tab]` to
 export PROJECTS=~/projects
 
+# Load all functions
+for file in $ZSH/functions/*; do
+  source $file
+done
+
 # Stash your environment variables in ~/.localrc. This means they'll stay out
 # of your main dotfiles repository (which may be public, like this one), but
 # you'll have access to them in your scripts.
-if [[ -a ~/.localrc ]]
-then
-  source ~/.localrc
-fi
+source_if_exists ~/.localrc
 
-# load all our zsh filess
-zsh_files=($DOTFILES_ROOT/**/*.zsh)
-for file in "${zsh_files[@]}"; do
-  source $file
-done
-unset zsh_files
+# load all our zsh files
+load_shell_files "$ZSH" "*.zsh"
 
-# get all of our shell files
-typeset -U config_files
-config_files=($ZSH/**/*.shell)
+# load path files first
+load_ordered_config "$ZSH" "path"
 
-# load the path files
-for file in ${(M)config_files:#*/path.shell}
-do
-  print "sourcing path file: " $file
-  source $file
-done
-
-# load everything but the path and completion files
-for file in ${${config_files:#*/path.shell}:#*/completion.shell}
-do
-  print "sourcing: " $file
-  source $file
-done
+# load main shell config files (aliases, env vars, etc.)
+load_ordered_config "$ZSH" "main"
 
 # initialize autocomplete here, otherwise functions won't be loaded
 autoload -U compinit
 compinit
 
-# load every completion after autocomplete loads
-for file in ${(M)config_files:#*/completion.shell}
-do
-  print "sourcing completion file: " $file
-  source $file
-done
-
-unset config_files
+# load completion files after autocomplete
+load_ordered_config "$ZSH" "completion"
 
 # Fig post block. Keep at the bottom of this file.
 [[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && . "$HOME/.fig/shell/zshrc.post.zsh"

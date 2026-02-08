@@ -1,6 +1,8 @@
+# Shell function - sourced by bashrc/zshrc
+# Works with: bash, zsh
 #
 # Interactive network client scanner
-#
+
 scan-network() {
     local ifaces cidrs display idx
     local IFS=$'\n'
