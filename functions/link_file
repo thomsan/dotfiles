@@ -18,15 +18,19 @@ link_file () {
 
       local currentSrc="$(readlink "$dst")"
 
-      if [ "$currentSrc" == "$src" ]
+      if [ -L "$dst" ] && [ "$currentSrc" == "$src" ]
       then
         success "already linked $dst"
         return 0
 
       else
-
-        user "File already exists: $dst ($(basename "$src")), what do you want to do?\n\
+        if [ ! -L "$dst" ]; then
+          user "File exists but is NOT a symlink: $dst ($(basename "$src")), what do you want to do?\n\
         [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?"
+        else
+          user "File already exists: $dst ($(basename "$src")), what do you want to do?\n\
+        [s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?"
+        fi
         read -r -n 1 action < /dev/tty
         echo ''
 

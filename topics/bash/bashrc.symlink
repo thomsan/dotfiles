@@ -12,15 +12,19 @@ esac
 # match all files and zero or more directories and subdirectories.
 shopt -s globstar
 
-# shortcut to this dotfiles path is $DOTFILES_ROOT
-export DOTFILES_ROOT="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")")/../.." && pwd)"
+# Bootstrap: source get_dotfiles_root relative to this file's symlink target,
+# then use it to resolve DOTFILES_ROOT and load all other functions.
+_this_dir="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")")" && pwd)"
+source "${_this_dir}/../../functions/get_dotfiles_root"
+export DOTFILES_ROOT="$(get_dotfiles_root "${BASH_SOURCE[0]}")" || return
+unset _this_dir
 
 # your project folder that we can `cd` to
 export PROJECTS=~/projects
 
 # Load all functions
-for file in $DOTFILES_ROOT/functions/*; do
-  source $file
+for file in "$DOTFILES_ROOT"/functions/*; do
+  source "$file"
 done
 
 # find out which platform we're running on
@@ -79,3 +83,10 @@ export PATH="$PATH:$HOME/.platformio/penv/bin"
 if [ -f ".venv/bin/activate" ]; then
     source .venv/bin/activate
 fi
+# >>> emrsiv bash completion >>>
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+  . /usr/share/bash-completion/bash_completion
+elif [ -f /etc/bash_completion ]; then
+  . /etc/bash_completion
+fi
+# <<< emrsiv bash completion <<<

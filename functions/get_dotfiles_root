@@ -1,24 +1,41 @@
 # Shell function - sourced by bashrc/zshrc
 # Works with: bash, zsh
 #
-# Get the dotfiles root directory by resolving the symlink of a config file
+# Get the dotfiles root directory
+# 1. Tries resolving the symlink of the calling config file (topics/*/*.symlink -> root)
+# 2. Falls back to well-known locations
 # Usage: get_dotfiles_root <config_file_path>
-# Returns: Absolute path to dotfiles root directory
+# Returns: Absolute path to dotfiles root directory, or empty + warning on failure
 
 get_dotfiles_root() {
   local config_file="$1"
-  local real_path
 
+  # Try symlink resolution first
   if [[ -L "$config_file" ]]; then
-    # It's a symlink, resolve it
-    real_path="$(readlink "$config_file" 2>/dev/null || echo "$config_file")"
-    # If relative path, make it absolute
-    [[ "$real_path" != /* ]] && real_path="$(dirname "$config_file")/$real_path"
-  else
-    # Not a symlink, make it absolute
-    real_path="$(cd "$(dirname "$config_file")" 2>/dev/null && pwd)/$(basename "$config_file")"
+    local real_path
+    real_path="$(readlink "$config_file" 2>/dev/null)"
+    if [[ -n "$real_path" ]]; then
+      # If relative path, make it absolute
+      [[ "$real_path" != /* ]] && real_path="$(dirname "$config_file")/$real_path"
+      # Navigate up two directories (config is in topics/*/file)
+      local root
+      root="$(cd "$(dirname "$real_path")/../.." 2>/dev/null && pwd)"
+      if [[ -d "$root/functions" ]]; then
+        printf '%s' "$root"
+        return 0
+      fi
+    fi
   fi
 
-  # Navigate up two directories to reach dotfiles root (config is in topics/*/file)
-  (cd "$(dirname "$real_path")/../.." 2>/dev/null && pwd)
+  # Fallback: check well-known locations
+  local candidate
+  for candidate in "$HOME/projects/dotfiles" "$HOME/.dotfiles"; do
+    if [[ -d "$candidate/functions" && -f "$candidate/bootstrap" ]]; then
+      printf '%s' "$candidate"
+      return 0
+    fi
+  done
+
+  echo "[WARN] Could not determine DOTFILES_ROOT — ~/.bashrc should be a symlink to bashrc.symlink" >&2
+  return 1
 }
