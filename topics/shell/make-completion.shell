@@ -1,0 +1,17 @@
+# Fallback make completion when bash-completion isn't available
+if ! type _make >/dev/null 2>&1; then
+  _emrsiv_make_targets() {
+    make -qp 2>/dev/null \
+      | awk -F':' '/^[a-zA-Z0-9][^$#\/\t=]*:([^=]|$)/ {split($1,a," "); for(i in a) print a[i]}' \
+      | grep -v -E '^(Makefile|makefile|GNUmakefile|FORCE)$' \
+      | grep -v -E '^\.' \
+      | sort -u
+  }
+
+  _emrsiv_make_complete() {
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    COMPREPLY=( $(compgen -W "$(_emrsiv_make_targets)" -- "$cur") )
+  }
+
+  complete -F _emrsiv_make_complete make
+fi
