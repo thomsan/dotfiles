@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
-export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3  # Path to your Python 3 interpreter
-export WORKON_HOME=$HOME/.virtualenvs  # Location of virtual environments
-source $HOME/.local/bin/virtualenvwrapper.sh
+# Virtual env deactivated (uncomment to re-activate)
+#export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3  # Path to your Python 3 interpreter
+#export WORKON_HOME=$HOME/.virtualenvs  # Location of virtual environments
+#source $HOME/.local/bin/virtualenvwrapper.sh

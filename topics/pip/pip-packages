@@ -1,6 +1,6 @@
-
-virtualenv
-virtualenvwrapper
+# Virtual env deactivated (uncomment to re-activate)
+#virtualenv
+#virtualenvwrapper
 
 # twine is a utility for publishing python packages on PyPI
 
