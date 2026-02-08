@@ -2,8 +2,7 @@
 [[ -f "$HOME/.fig/shell/zshrc.pre.zsh" ]] && . "$HOME/.fig/shell/zshrc.pre.zsh"
 
 # shortcut to this dotfiles path is $ZSH
-source "${(%):-%x:A:h:h:h}/functions/get_dotfiles_root"
-export ZSH="$(get_dotfiles_root "${(%):-%x}")"
+export ZSH="$(cd "$(dirname "$(readlink "${(%):-%x}" 2>/dev/null || echo "${(%):-%x}")")/../.." && pwd)"
 
 # your project folder that we can `c [tab]` to
 export PROJECTS=~/projects

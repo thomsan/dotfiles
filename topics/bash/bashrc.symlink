@@ -13,7 +13,7 @@ esac
 shopt -s globstar
 
 # shortcut to this dotfiles path is $DOTFILES_ROOT
-export DOTFILES_ROOT=$HOME/.dotfiles
+export DOTFILES_ROOT="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")")/../.." && pwd)"
 
 # your project folder that we can `cd` to
 export PROJECTS=~/projects

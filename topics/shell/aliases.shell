@@ -7,7 +7,7 @@ alias -- -="cd -"
 
 alias dl='cd ~/Downloads'
 alias desk='cd ~/Desktop'
-alias dot='cd ~/.dotfiles'
+alias dot='cd "$DOTFILES_ROOT"'
 alias doc='cd ~/Documents'
 
 # Open Files explorer at current dir
